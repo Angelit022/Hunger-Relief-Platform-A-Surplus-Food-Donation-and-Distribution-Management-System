@@ -10,13 +10,13 @@
     <div class="header">
         <div class="logo"><img src = lablab.jpg></div>
         <nav class="nav-menu">
-            <a href="#">Home</a>
-            <a href="#">Search Food</a>
-            <a href="#">Donate</a>
-            <a href="#">Request</a>
-            <a href="#">Dashboard</a>
-            <a href="#">Profile</a>
-            <a href="#">Logout</a>
+            <a href="index.php">Home</a>
+            <a href="search.php">Search Food</a>
+            <a href="#donate.php">Donate</a>
+            <a href="request.php">Request</a>
+            <a href="dashboard.php">Dashboard</a>
+            <a href="profile.php">Profile</a>
+            <a href="logout.php">Logout</a>
         </nav>
     </div>
     <div class="main-content">
@@ -25,7 +25,7 @@
         <div class="background-image">
             <div class="cta-section">
                 <div class="cta-image"><img src = lablab.jpg alt = "Donate"> </div>
-                <p>"Your support can change lives—become a donor today and help make a lasting impact!"</p>
+                <p>"Your support can change lives become a donor today and help make a lasting impact!"</p>
                 <button class="donor-button">Become a donor</button>
             </div>
         </div>
