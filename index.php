@@ -1,34 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hunger Relief Platform</title>
-    <link rel="stylesheet" href="sheet.css">
-</head>
-<body>
-    <div class="header">
-        <div class="logo"><img src = lablab.jpg></div>
-        <nav class="nav-menu">
-            <a href="index.php">Home</a>
-            <a href="search.php">Search Food</a>
-            <a href="#donate.php">Donate</a>
-            <a href="request.php">Request</a>
-            <a href="dashboard.php">Dashboard</a>
-            <a href="profile.php">Profile</a>
-            <a href="logout.php">Logout</a>
-        </nav>
+<?php
+include "header.php";
+?>
+
+<div style="background-image: url('lablab.jpg'); background-size: cover; background-position: center; height: 100vh;">
+  <div class="container text-white py-5">
+    <div class="row align-items-center g-5">
+      <div class="col-md-6">
+      
+        <h1 class="mb-5" style="font-size: 5rem;"><strong>Hunger Relief Platform</strong></h1>
+        <p>
+        A Surplus Food Donation and Distribution Management System
+        </p>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+      </div>
+      <div class="col-md-6 text-center">
+      </div>
     </div>
-    <div class="main-content">
-        <h1>Hunger Relief Platform</h1>
-        <p>A Surplus Food Donation and Distribution Management System</p>
-        <div class="background-image">
-            <div class="cta-section">
-                <div class="cta-image"><img src = lablab.jpg alt = "Donate"> </div>
-                <p>"Your support can change lives become a donor today and help make a lasting impact!"</p>
-                <button class="donor-button">Become a donor</button>
-            </div>
-        </div>
-    </div>
+  </div>
+</div>
+
+<?php
+include "footer.php";
+?>
+  
 </body>
-</html
+</html>

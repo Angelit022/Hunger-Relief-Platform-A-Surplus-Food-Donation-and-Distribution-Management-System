@@ -1,14 +1,26 @@
 <?php
-$host = 'localhost';
-$db = 'hunger_relief_db';
-$user = 'root'; 
-$pass = '';     
+class Database {
+    private $host = "localhost";
+    private $username = "root";
+    private $password = "";
+    private $database = "hunger_relief_db";
+    private $connection;
 
-// Create connection
-$conn = new mysqli($host, $user, $pass, $db);
+    public function getConnection() {
+        if ($this->connection === null) {
+            $this->connection = new mysqli($this->host, $this->username, $this->password, $this->database);
+            if ($this->connection->connect_error) {
+                die("Error: Failed to connect to MySQL - " . $this->connection->connect_error);
+            }
+        }
+        return $this->connection;
+    }
 
-// Check connection
-if (!$conn) {
-    die(mysqli_error($conn));
-} 
+    public function closeConnection() {
+        if ($this->connection !== null) {
+            $this->connection->close();
+            $this->connection = null;
+        }
+    }
+}
 ?>
