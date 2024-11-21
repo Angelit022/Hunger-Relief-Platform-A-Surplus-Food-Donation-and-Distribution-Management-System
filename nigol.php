@@ -1,15 +1,13 @@
-<?php
+<?php 
+require_once "layout/header.php";
+require_once "classes/user_service.php";
 
-include "layout/header.php";
-
-// Logged-in users are directed to the homepage
 if (isset($_SESSION["email"])) {
     header("location: index.php");
     exit;
 }
 
-$email = "";
-$error = "";
+$email = $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
@@ -18,42 +16,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($email) || empty($password)) {
         $error = "Email and Password are required!";
     } else {
-        include "db_connection.php";
-        $dbConnection = getDatabaseConnection();
+        $userService = new UserService();
+        $user = $userService->loginUser($email, $password);
 
-        $statement = $dbConnection->prepare
-        ("SELECT user_id, first_name, last_name, email, phone, address, password, created_at FROM users WHERE email = ?");
+        if ($user) {
+            // Store user session data
+            $_SESSION = $user;
 
-        // Bind the email variable to the prepared statement as a parameter
-        $statement->bind_param("s", $email);
-
-        // Execute the statement
-        $statement->execute();  
-
-        // Bind result variables
-        $statement->bind_result($user_id, $first_name, $last_name, $email, $phone, $address, $stored_password, $created_at);
-
-        // Fetch values
-        if ($statement->fetch()) { 
-            if (password_verify($password, $stored_password)) {
-                // Password is correct, set up session data
-                $_SESSION["user_id"] = $user_id;
-                $_SESSION["first_name"] = $first_name;
-                $_SESSION["last_name"] = $last_name;
-                $_SESSION["email"] = $email;
-                $_SESSION["phone"] = $phone;
-                $_SESSION["address"] = $address;
-                $_SESSION["created_at"] = $created_at;
-
-                // Redirect user to the home page
-                header("Location: index.php");
-                exit;
-            }
-
+            // SweetAlert success message after login
+            echo "<script>
+                    Swal.fire({
+                        position: 'top-center',
+                        icon: 'success',
+                        title: 'Successfully logged in!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.href = 'index.php';  // Redirect after alert closes
+                    });
+                  </script>";
+            exit; // Ensure no further code is executed after the SweetAlert.
+        } else {
+            $error = "Email or Password Invalid";
         }
-           
-        $statement->close();
-        $error = "Email or Password Invalid";
     }
 }
 ?>
@@ -94,5 +79,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 
 <?php
-include "layout/footer.php";
+require_once "layout/footer.php";
 ?>
