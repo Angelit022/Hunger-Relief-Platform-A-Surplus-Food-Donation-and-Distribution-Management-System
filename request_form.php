@@ -1,21 +1,22 @@
 <?php
 require_once 'db_connection.php';
 
-
+// Create Database connection
 $database = new Database();
 $conn = $database->getConnection();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    // Ensure all required fields are filled
     if (isset($_POST['name'], $_POST['email'], $_POST['address'], $_POST['food_type'], $_POST['message'])) {
-     
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $address = $_POST['address'];
-        $food_type = $_POST['food_type'];
-        $message = $_POST['message'];
 
-       
+        
+        $name = htmlspecialchars($_POST['name']);
+        $email = htmlspecialchars($_POST['email']);
+        $address = htmlspecialchars($_POST['address']);
+        $food_type = htmlspecialchars($_POST['food_type']);
+        $message = htmlspecialchars($_POST['message']);
+
         $stmt = $conn->prepare("INSERT INTO donations (name, email, address, food_type, message) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $name, $email, $address, $food_type, $message);
 
@@ -25,11 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<script>alert('Error submitting request.');</script>";
         }
 
-      
         $stmt->close();
     } 
 }
 
+// Close database connection
 $conn->close();
 ?>
 
@@ -46,8 +47,7 @@ $conn->close();
 <div class="container mt-5">
     <h2>Donation Request Form</h2>
 
-   
-    <form method="POST" action="request_form.php">
+    <form method="POST" action="request.php">
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
             <input type="text" class="form-control" id="name" name="name" required>
