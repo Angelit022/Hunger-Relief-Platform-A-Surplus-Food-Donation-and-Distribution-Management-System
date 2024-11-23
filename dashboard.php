@@ -1,6 +1,6 @@
 <?php
 require_once "layout/header.php";
-require_once "db_connection.php";
+require_once "classes/db_connection.php";
 require_once "classes/DonationManager.php";
 
 // Check if the user is logged in
@@ -14,32 +14,41 @@ $database = new Database();
 $conn = $database->getConnection();
 $donationManager = new DonationManager($conn);
 
-// Handle delete request
-if (isset($_GET['delete'])) {
-    $donationManager->deleteDonation($_GET['delete']);
-    header("Location: dashboard.php");
-    exit();
-}
-
-// Fetch all donations
+// Fetch all donations (This will always fetch the latest data)
 $donations = $donationManager->getDonations();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-<head>  
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Link to custom CSS file -->
+    <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-<div class="container">
+<div class="donation-dashboard-container">
     <h2>Donations</h2>
 
-    <!-- Display Donations -->
-    <table class="table table-bordered">
+    <!-- Display Donations Table -->
+    <table id="donationsTable" class="table table-striped table-bordered donation-table">
         <thead>
             <tr>
                 <th>Name</th>
@@ -67,14 +76,36 @@ $donations = $donationManager->getDonations();
                     <td><?= htmlspecialchars($donation["delivery_option"]); ?></td>
                     <td><?= htmlspecialchars($donation["message"]); ?></td>
                     <td>
-                        <a href="edit_donation.php?edit=<?= $donation["id"]; ?>" class="btn btn-warning btn-sm">Edit</a>
-                        <a href="dashboard.php?delete=<?= $donation["id"]; ?>" class="btn btn-danger btn-sm">Delete</a>
+                        <form action="edit_donation.php" method="POST" style="display: inline;">
+                            <input type="hidden" name="edit" value="<?= $donation["id"]; ?>">
+                            <button type="submit" class="btn btn-warning btn-sm">Edit</button>
+                        </form>
+                        <form action="delete_donation.php" method="POST" style="display: inline;">
+                            <input type="hidden" name="id" value="<?= $donation["id"]; ?>">
+                            <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                        </form>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 </div>
+
+<!-- Initialize DataTables -->
+<script>
+    $(document).ready(function() {
+        $('#donationsTable').DataTable({
+            "paging": true,          // Enable pagination
+            "searching": true,       // Enable search
+            "ordering": true,        // Enable column ordering
+            "info": true,            // Show table information
+            "lengthMenu": [5, 10, 25, 50, 100], // Options for "entries per page"
+            "columnDefs": [
+                { "orderable": false, "targets": -1 } // Disable ordering for the "Actions" column
+            ]
+        });
+    });
+</script>
 </body>
 </html>
 
