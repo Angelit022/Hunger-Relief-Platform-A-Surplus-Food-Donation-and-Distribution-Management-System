@@ -1,33 +1,42 @@
 <?php
 require_once 'db_connection.php';
+require_once "RequestManager.php";
 
 // Create Database connection
 $database = new Database();
 $conn = $database->getConnection();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     // Ensure all required fields are filled
-    if (isset($_POST['name'], $_POST['email'], $_POST['address'], $_POST['food_type'], $_POST['message'])) {
-
-        
-        $name = htmlspecialchars($_POST['name']);
+    if (isset($_POST['full_name'], $_POST['email'], $_POST['location'], $_POST['requested_items'], $_POST['quantity'], $_POST['item_condition'], $_POST['urgency'], $_POST['notes'])) {
+        // Sanitize inputs
+        $name = htmlspecialchars($_POST['full_name']);  // Changed from full_name to name
         $email = htmlspecialchars($_POST['email']);
-        $address = htmlspecialchars($_POST['address']);
-        $food_type = htmlspecialchars($_POST['food_type']);
-        $message = htmlspecialchars($_POST['message']);
+        $location = htmlspecialchars($_POST['location']);
+        $requested_items = htmlspecialchars($_POST['requested_items']);
+        $quantity = htmlspecialchars($_POST['quantity']);
+        $item_condition = implode(", ", $_POST['item_condition']);
+        $urgency = htmlspecialchars($_POST['urgency']);
+        $notes = htmlspecialchars($_POST['notes']);
+        $status = "Pending";
 
-        $stmt = $conn->prepare("INSERT INTO donations (name, email, address, food_type, message) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $name, $email, $address, $food_type, $message);
+        // Updated SQL query to match database column names
+        $stmt = $conn->prepare("INSERT INTO requests (name, email, location, requested_items, quantity, item_condition, urgency, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        
+        if ($stmt) {
+            $stmt->bind_param("ssssissss", $name, $email, $location, $requested_items, $quantity, $item_condition, $urgency, $notes, $status);
 
-        if ($stmt->execute()) {
-            echo "<script>alert('Request submitted successfully!');</script>";
+            if ($stmt->execute()) {
+                header("Location: dashboard.php");
+                exit();
+            } else {
+                echo "<script>alert('Error submitting request: " . $stmt->error . "');</script>";
+            }
+            $stmt->close();
         } else {
-            echo "<script>alert('Error submitting request.');</script>";
+            echo "<script>alert('Error preparing statement: " . $conn->error . "');</script>";
         }
-
-        $stmt->close();
-    } 
+    }
 }
 
 // Close database connection
@@ -47,10 +56,10 @@ $conn->close();
 <div class="container mt-5">
     <h2>Donation Request Form</h2>
 
-    <form method="POST" action="request.php">
+    <form method="POST">
         <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" name="name" required>
+            <label for="fullName" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="fullName" name="full_name" required>
         </div>
 
         <div class="mb-3">
@@ -59,18 +68,49 @@ $conn->close();
         </div>
 
         <div class="mb-3">
-            <label for="address" class="form-label">Address</label>
-            <input type="text" class="form-control" id="address" name="address" required>
+            <label for="location" class="form-label">Location</label>
+            <input type="text" class="form-control" id="location" name="location" required>
         </div>
 
-        <div class="mb-3">
-            <label for="food_type" class="form-label">Food Type</label>
-            <input type="text" class="form-control" id="food_type" name="food_type" required>
+        <div class="form-group mb-3">
+            <label for="requestedItems">Requested Items</label>
+            <textarea name="requested_items" id="requestedItems" class="form-control" rows="4" required></textarea>
         </div>
 
-        <div class="mb-3">
-            <label for="message" class="form-label">Message</label>
-            <textarea class="form-control" id="message" name="message" required></textarea>
+        <div class="form-group mb-3">
+            <label for="quantity">Quantity</label>
+            <input type="number" name="quantity" id="quantity" class="form-control" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Item Condition</label><br>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="item_condition[]" value="Unopened" id="condition1">
+                <label class="form-check-label" for="condition1">Unopened</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="item_condition[]" value="Properly Packaged" id="condition2">
+                <label class="form-check-label" for="condition2">Properly Packaged</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="item_condition[]" value="Within Expiry Date" id="condition3">
+                <label class="form-check-label" for="condition3">Within Expiry Date</label>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="urgency">Urgency Level</label>
+            <select name="urgency" id="urgency" class="form-control" required>
+                <option value="" disabled selected>Select Urgency Level</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="notes">Notes (Optional)</label>
+            <textarea name="notes" id="notes" class="form-control" rows="4"></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary">Submit Request</button>
