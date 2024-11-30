@@ -1,72 +1,102 @@
-<?php
-$loginError = '';
+<?php 
+require_once "layout/header.php";
+require_once "classes/user_service.php";
+
+if (isset($_SESSION["email"])) {
+    if ($_SESSION['role'] === 'admin') {
+        header("location: admin_dashboard.php"); // Redirect to admin dashboard
+    } else {
+        header("location: index.php"); // Redirect to user homepage
+    }
+    exit;
+}
+
+$email = $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    include 'db_connection.php'; // Ensure you have this file to connect to your database
-    $username = $_POST['username'];
+    $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Handle login
-    if (isset($_POST['action']) && $_POST['action'] == 'login') {
-        // Prepare and execute the SQL statement to prevent SQL injection
-        $sql = "SELECT * FROM signin WHERE username='$username'";
-        $result = mysqli_query($conn, $sql);
-        
-        if ($result) {
-            $user = mysqli_fetch_assoc($result); // Fetch user data
-            if ($user && password_verify($password, $user['password'])) { // Verify password
-                // Login successful, redirect or set session
-                header('Location: welcome.php'); // Redirect to a welcome page
-                exit();
+    if (empty($email) || empty($password)) {
+        $error = "Email and Password are required!";
+    } else {
+        $userService = new UserService();
+        $user = $userService->loginUser($email, $password);
+
+        if ($user) {
+            // Store user session data
+            $_SESSION = $user;
+
+            if ($user['role'] === 'admin') {
+                // SweetAlert success message for admin login
+                echo "<script>
+                        Swal.fire({
+                            position: 'top-center',
+                            icon: 'success',
+                            title: 'Welcome Admin!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(() => {
+                            window.location.href = 'AdminPanel/dashboard.php';  // Redirect after alert closes
+                        });
+                      </script>";
             } else {
-                $loginError = "Invalid username or password."; // Error message for login
+                // SweetAlert success message for regular user login
+                echo "<script>
+                        Swal.fire({
+                            position: 'top-center',
+                            icon: 'success',
+                            title: 'Successfully logged in!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(() => {
+                            window.location.href = 'index.php';  // Redirect after alert closes
+                        });
+                      </script>";
             }
+            exit; // Ensure no further code is executed after the SweetAlert.
         } else {
-            die(mysqli_error($conn)); // Handle query error
+            $error = "Email or Password Invalid";
         }
     }
 }
 ?>
 
+<div class="container py-5">
+    <div class="col-md-6 col-lg-4 mx-auto border shadow-sm p-4 rounded">
+        <h2 class="text-center mb-4">Login</h2>
+        <hr />
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
+        <?php if(!empty($error)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><?= $error ?></strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
 
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input class="form-control" name="email" value="<?= $email ?>" />
+            </div>
 
-<title>Log in Page</title>
-<style>
-    body{
-        background-color:whitesmoke
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input class="form-control" type="password" name="password" />
+            </div>
 
-    }
-    .container {
-        margin-top: 150px;
-    }
-    input{
-        max-width: 250px;
-        min-width: 250px;
-    }
-</style>
-
-</head>
-<body>
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-10 col-md-offset-3" align="center">
-            <h2>Sign In</h2>
-            <form action="login.php" method="POST">
-                <input type="text" name="username" class="form-control" placeholder="Enter email"/><br/>
-                <input type="password" name="password" class="form-control" placeholder="Enter password"/><br/>
-                <input type="submit" value="Login" class="btn btn-success">
-</form>
-         </div>
+            <div class="row mb-3">
+                <div class="col d-grid">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+                <div class="col d-grid">
+                    <a href="index.php" class="btn btn-outline-primary">Cancel</a>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
-</body>
 
-</html>
+<?php
+require_once "layout/footer.php";
+?>
