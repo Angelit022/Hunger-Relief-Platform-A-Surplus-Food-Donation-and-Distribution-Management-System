@@ -2,6 +2,10 @@
 require_once "db_connection.php";
 
 class UserService extends Database {
+    private $adminCredentials = [
+        'email' => 'admin@gmail.com',
+        'password' => 'admin123' // Ideally, use a hashed password in production
+    ];
 
     public function registerUser($first_name, $last_name, $email, $phone, $address, $password) {
         $connection = $this->getConnection();
@@ -19,6 +23,18 @@ class UserService extends Database {
     }
 
     public function loginUser($email, $password) {
+        // Check if the credentials match the admin credentials
+        if ($email === $this->adminCredentials['email'] && $password === $this->adminCredentials['password']) {
+            return [
+                "user_id" => 0,
+                "first_name" => "Admin",
+                "last_name" => "User",
+                "email" => $this->adminCredentials['email'],
+                "role" => "admin"
+            ];
+        }
+
+        // Check in the database for regular users
         $connection = $this->getConnection();
 
         $stmt = $connection->prepare("SELECT user_id, first_name, last_name, email, phone, address, password, created_at FROM users WHERE email = ?");
@@ -35,6 +51,7 @@ class UserService extends Database {
                 "email" => $email,
                 "phone" => $phone,
                 "address" => $address,
+                "role" => "user",
                 "created_at" => $created_at
             ];
         } else {
