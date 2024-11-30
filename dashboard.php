@@ -47,11 +47,10 @@ $requests = $requestManager->getRequestsByStatus('Pending'); // Adjust status fi
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Link to custom CSS file -->
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-<!-- Donation Dashboard -->
+
 <div class="donation-dashboard-container">
     <h2>Donations Table</h2>
 
@@ -69,7 +68,7 @@ $requests = $requestManager->getRequestsByStatus('Pending'); // Adjust status fi
             <th>Products Condition</th>
             <th>Delivery Option</th>
             <th>Message</th>
-            <th>Status</th> <!-- New Status Column -->
+            <th>Status</th> 
             <th>Actions</th>
         </tr>
     </thead>
@@ -137,7 +136,7 @@ $requests = $requestManager->getRequestsByStatus('Pending'); // Adjust status fi
                         <button type="submit" class="btn btn-warning btn-sm">Edit</button>
                     </form>
                     <form action="delete_request.php" method="POST" style="display: inline;">
-                        <input type="hidden" name="id" value="<?= $request['requestor_id']; ?>"> <!-- Corrected Request ID -->
+                        <input type="hidden" name="id" value="<?= $request['requestor_id']; ?>">
                         <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
                     </form>
                 </td>
