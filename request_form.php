@@ -1,123 +1,185 @@
 <?php
-require_once 'db_connection.php';
+require_once "header.php";
+require_once "db_connection.php";
 require_once "RequestManager.php";
 
-// Create Database connection
+// Initialize database connection
 $database = new Database();
 $conn = $database->getConnection();
+$requestManager = new RequestManager($conn);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Ensure all required fields are filled
-    if (isset($_POST['full_name'], $_POST['email'], $_POST['location'], $_POST['requested_items'], $_POST['quantity'], $_POST['item_condition'], $_POST['urgency'], $_POST['notes'])) {
-        // Sanitize inputs
-        $name = htmlspecialchars($_POST['full_name']);  // Changed from full_name to name
-        $email = htmlspecialchars($_POST['email']);
-        $location = htmlspecialchars($_POST['location']);
-        $requested_items = htmlspecialchars($_POST['requested_items']);
-        $quantity = htmlspecialchars($_POST['quantity']);
-        $item_condition = implode(", ", $_POST['item_condition']);
-        $urgency = htmlspecialchars($_POST['urgency']);
-        $notes = htmlspecialchars($_POST['notes']);
-        $status = "Pending";
 
-        // Updated SQL query to match database column names
-        $stmt = $conn->prepare("INSERT INTO requests (name, email, location, requested_items, quantity, item_condition, urgency, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        
-        if ($stmt) {
-            $stmt->bind_param("ssssissss", $name, $email, $location, $requested_items, $quantity, $item_condition, $urgency, $notes, $status);
+// Get donation_id from URL
+$donation_id = isset($_GET['donation_id']) ? intval($_GET['donation_id']) : null;
 
-            if ($stmt->execute()) {
-                header("Location: dashboard.php");
-                exit();
-            } else {
-                echo "<script>alert('Error submitting request: " . $stmt->error . "');</script>";
-            }
-            $stmt->close();
+// Fetch donation details if donation_id is present
+$donation = null;
+if ($donation_id) {
+    $stmt = $conn->prepare("SELECT * FROM donations WHERE id = ?");
+    $stmt->bind_param("i", $donation_id);
+    $stmt->execute();
+    $donation = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+}
+
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Retrieve form data
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $phone = $_POST['phone'];
+    $delivery_option = $_POST['delivery_option'];
+    $notes = $_POST['special_notes'];
+
+
+    // Ensure donation_id is provided
+    if (!$donation_id) {
+        echo "<script>
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Donation ID is missing. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'Close'
+                });
+              </script>";
+        exit;
+    }
+
+
+    // Check if the user has already made a request for the specific donation_id
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM donation_requests WHERE donation_id = ? AND requestor_email = ?");
+    $stmt->bind_param("is", $donation_id, $email);
+    $stmt->execute();
+    $stmt->bind_result($existing_request_count);
+    $stmt->fetch();
+    $stmt->close();
+
+
+    if ($existing_request_count > 0) {
+        // Show SweetAlert if the user has already requested the specific donation
+        echo "<script>
+                Swal.fire({
+                    title: 'Request Already Submitted!',
+                    text: 'You have already submitted a request for this donation.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    willClose: () => {
+                        window.location.href = 'donation_list.php';
+                    }
+                });
+              </script>";
+    } else {
+        // Proceed with adding the request
+        $success = $requestManager->addRequest($name, $email, $phone, $delivery_option, $notes, $donation_id);
+
+
+        if ($success) {
+            // Display success message and trigger SweetAlert
+            echo "<script>
+                    Swal.fire({
+                        title: 'Request Submitted!',
+                        text: 'Your request has been successfully recorded.',
+                        icon: 'success',
+                        confirmButtonText: 'Close',
+                        willClose: () => {
+                            window.location.href = 'donation_list.php';
+                        }
+                    });
+                  </script>";
         } else {
-            echo "<script>alert('Error preparing statement: " . $conn->error . "');</script>";
+            // If an error occurs during request submission
+            echo "<script>
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'There was an issue submitting your request. Please try again later.',
+                        icon: 'error',
+                        confirmButtonText: 'Close'
+                    });
+                  </script>";
         }
     }
 }
-
-// Close database connection
-$conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donation Request Form</title>
+    <title>Request Form</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
-<div class="container mt-5">
-    <h2>Donation Request Form</h2>
 
-    <form method="POST">
-        <div class="mb-3">
-            <label for="fullName" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="fullName" name="full_name" required>
+<!-- Donation Form Container -->
+<div class="donation-form-container">
+    <!-- Donation Details Box -->
+    <?php if ($donation): ?>
+        <div class="donation-details-box" style="width: 30%; max-width: 700px; padding: 25px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-bottom: 30px; transition: transform 0.3s ease, box-shadow 0.3s ease; margin-top: 20px; border: 1px solid #ccc;">
+            <h3 style="color: #007bff; font-size: 1.6rem; margin-bottom: 15px; text-align: center; font-weight: bold;">Donation Details</h3>
+            <p style="font-size: 1.1rem; margin: 10px 0; text-align: center;">
+                <strong style="color: #343a40; font-weight: bold;">Donor Name:</strong> <?php echo htmlspecialchars($donation['name']); ?>
+            </p>
+            <p style="font-size: 1.1rem; margin: 10px 0; text-align: center;">
+                <strong style="color: #343a40; font-weight: bold;">Product Type:</strong> <?php echo htmlspecialchars($donation['products_type']); ?>
+            </p>
+            <p style="font-size: 1.1rem; margin: 10px 0; text-align: center;">
+                <strong style="color: #343a40; font-weight: bold;">Quantity:</strong> <?php echo htmlspecialchars($donation['quantity']); ?>
+            </p>
+            <p style="font-size: 1.1rem; margin: 10px 0; text-align: center;">
+                <strong style="color: #343a40; font-weight: bold;">Delivery Option:</strong> <?php echo htmlspecialchars($donation['delivery_option']); ?>
+            </p>
         </div>
+    <?php endif; ?>
+    <div class="donor-info">
+        <h2>Request Form</h2>
 
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" required>
-        </div>
 
-        <div class="mb-3">
-            <label for="location" class="form-label">Location</label>
-            <input type="text" class="form-control" id="location" name="location" required>
-        </div>
-
-        <div class="form-group mb-3">
-            <label for="requestedItems">Requested Items</label>
-            <textarea name="requested_items" id="requestedItems" class="form-control" rows="4" required></textarea>
-        </div>
-
-        <div class="form-group mb-3">
-            <label for="quantity">Quantity</label>
-            <input type="number" name="quantity" id="quantity" class="form-control" required>
-        </div>
-
-        <div class="form-group mb-3">
-            <label>Item Condition</label><br>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" class="form-check-input" name="item_condition[]" value="Unopened" id="condition1">
-                <label class="form-check-label" for="condition1">Unopened</label>
+        <form method="POST">
+            <input type="hidden" name="donation_id" value="<?= $donation_id; ?>"> <!-- Hidden field for donation_id -->
+            <div class="form-group">
+                <label for="name" class="form-label">Your Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
             </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" class="form-check-input" name="item_condition[]" value="Properly Packaged" id="condition2">
-                <label class="form-check-label" for="condition2">Properly Packaged</label>
+            <div class="form-group">
+                <label for="email" class="form-label">Your Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
             </div>
-            <div class="form-check form-check-inline">
-                <input type="checkbox" class="form-check-input" name="item_condition[]" value="Within Expiry Date" id="condition3">
-                <label class="form-check-label" for="condition3">Within Expiry Date</label>
+            <div class="form-group">
+                <label for="phone" class="form-label">Your Phone</label>
+                <input type="text" class="form-control" id="phone" name="phone" required>
             </div>
-        </div>
+            <div class="form-group">
+                <label for="delivery_option" class="form-label">Delivery Option</label>
+                <select class="form-control" id="delivery_option" name="delivery_option" required>
+                    <option value="" disabled selected>Select Delivery Option</option>
+                    <option value="Pick Up">Pick Up</option>
+                    <option value="Drop Off">Drop Off</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="special_notes" class="form-label">Special Notes</label>
+                <textarea class="form-control" id="special_notes" name="special_notes"></textarea>
+            </div>
+            <div class="form-buttons">
+                <a href="donation_list.php" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-submit">Submit Request</button>
+            </div>
+        </form>
 
-        <div class="form-group mb-3">
-            <label for="urgency">Urgency Level</label>
-            <select name="urgency" id="urgency" class="form-control" required>
-                <option value="" disabled selected>Select Urgency Level</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-            </select>
-        </div>
 
-        <div class="form-group mb-3">
-            <label for="notes">Notes (Optional)</label>
-            <textarea name="notes" id="notes" class="form-control" rows="4"></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Submit Request</button>
-    </form>
+    </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
+
+
+<?php
+require_once "footer.php";
