@@ -1,71 +1,377 @@
-body {
-    background-color: #f8f9fa;
+
+
+/* Charrisse - Donation Form Styles */
+.donation-form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #f8f9fa00;
 }
 
-.register-container {
-    max-width: 500px;
-    margin: auto;
-    padding: 30px;
-    background-color: #ffffff;
+.donor-info {
+    width: 100%;
+    max-width: 700px;
+    background-color: #fff;
+    padding: 90px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    margin-top: 80px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
 }
 
-.register-title {
-    font-size: 24px;
-    font-weight: 700;
+.donor-info h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: #343a40;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    font-size: 1.2rem;
     color: #333;
 }
 
-nav {
-    background-color: #f8f9fa;
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+button.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background-color 0.3s;
+}
+
+button.btn-submit:hover {
+    background-color: #0056b3;
+}
+
+/*angelito's css*/
+/* Style for the buttons container */
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+button.btn-submit {
+    width: 45%;
+}
+
+a.btn-cancel {
+    width: 45%;
+    padding: 12px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+a.btn-cancel:hover {
+    background-color: #d32f2f;
+}
+
+/* Donation Table Styles */
+.donation-dashboard-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(32, 178, 171, 0.591);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.donation-dashboard-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.donation-table {
+    width: 100%;
+    font-size: 0.8rem; /* Reduced font size for compact table */
+    table-layout: fixed; /* Ensures all columns fit within the available space */
+}
+
+.donation-table th,
+.donation-table td {
+    text-align: center;
+    vertical-align: middle;
+    word-wrap: break-word;
+}
+
+.donation-table th {
+    background-color: #fcfcb7;
+    color: #000000;
     padding: 10px;
 }
 
-nav ul {
-    list-style-type: none;
-    padding: 0;
+.donation-table td {
+    padding: 8px;
 }
 
-nav ul li {
-    display: inline;
-    margin-right: 15px;
+/* Consistent Button Sizes */
+.btn-sm {
+    font-size: 0.875rem; /* Ensure font size is consistent */
+    padding: 8px 16px;    /* Set padding to make buttons equal in size */
+    width: 120px;         /* Fixed width for both buttons */
+    text-align: center;   /* Center text */
 }
 
-nav ul li a {
-    text-decoration: none;
+.donation-table .btn-warning,
+.donation-table .btn-danger {
+    width: 100%;
+    padding: 8px;
+}
+
+.donation-table .btn-warning,
+.donation-table .btn-danger,
+.request-table .btn-warning,
+.request-table .btn-danger {
+    width: 80px;         /* Make buttons same width */
+    padding: 8px 16px;    /* Consistent padding */
+}
+
+/* Adjusted Request Table */
+.request-dashboard-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(32, 178, 171, 0.559);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.request-dashboard-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.request-table {
+    width: 100%;
+    font-size: 0.9rem; /* Smaller font for a compact table */
+}
+
+.request-table th,
+.request-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.request-table th {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.request-table .btn-warning {
+    background-color: #f0ad4e;
+    border-color: #f0ad4e;
+}
+
+.request-table .btn-danger {
+    background-color: #d9534f;
+    border-color: #d9534f;
+}
+
+
+/*jerick's style*/
+.donors-header {
+    text-align: center;
+    padding: 20px;
+ 
+}
+.donor-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+.donor-card {
+    background-color:   rgba(64, 211, 204, 0.301);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: left;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.donor-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #0011ff;
+}
+.donor-card p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+.donor-card button {
+    margin-top: 10px;
+    width: 100%;
+    background-color: #007bffc0;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.donor-card button:hover {
+    background-color: #9fceff;
+}
+
+/* Charrise donationpage / Hero Section Styles */
+.hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 50px;
+    background-color: #f8f9fa;
+    gap: 20px;
+}
+
+.hero-text {
+    max-width: 50%;
+}
+
+.hero-text h1 {
+    font-size: 2.5rem;
     color: #007bff;
+    margin-bottom: 20px;
 }
 
-nav .search-form {
-    display: inline;
+.hero-text p {
+    font-size: 1.2rem;
+    color: #343a40;
+    margin-bottom: 20px;
 }
 
-nav .search-form input {
-    padding: 5px;
-    margin-right: 5px;
+.btn-highlight {
+    padding: 15px 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: background-color 0.3s ease-in-out;
 }
 
-.alert {
-    display: none; /* Hide the alert by default */
+.btn-highlight:hover {
+    background-color: #0056b3;
+    cursor: pointer;
 }
 
-.show {
-    display: block; /* Show alert when this class is added */
-    animation: fadeIn 3s forwards; /* Fade in effect */
+.hero-image img {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.fade-out {
-    animation: fadeOut 1s forwards; /* Fade out effect */
+/* Donation Info Section */
+.donation-info-section {
+    padding: 40px;
+    background-color: #fdfdee;
+    text-align: center;
 }
 
-@keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+.donation-info-section h2 {
+    font-size: 2rem;
+    color: #343a40;
+    margin-bottom: 20px;
 }
 
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
+.donation-info-section p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.donation-info-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    text-align: left;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.donation-info-section li {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Adjusted Call-to-Action Section */
+.call-to-action {
+    background-image: url('images/donateNow.jpg'); /* Replace with the path to your image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    text-align: center;
+    padding: 60px;
+    color: white; /* Ensures text is readable on the image */
+    position: relative;
+    max-width: 1000px; /* Set a maximum width */
+    margin: 50px auto; /* Center the box horizontally and add space at the top */
+    border-radius: 10px; /* Optional: adds rounded corners for a "boxy" look */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: adds a subtle shadow for depth */
+}
+
+.call-to-action h2 {
+    position: relative;
+    z-index: 5; /* Ensures text appears above the overlay */
+    margin-bottom: 20px; /* Adds space below the heading */
+}
+
+.call-to-action a {
+    position: relative;
+    z-index: 5; /* Ensures button appears above the overlay */
+    display: inline-block; /* Ensures margin works */
+    margin-top: 20px; /* Adds space above the button */
+    padding: 15px 30px;
+    background-color: #1660ffb3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.call-to-action a:hover {
+    background-color: #d7eaffd3;
+    cursor: pointer;
+    color: rgb(0, 0, 0);
+}
+
+.call-to-action::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.388); /* Adds a dark overlay for better text contrast */
+    z-index: 1;
+    border-radius: 10px; /* Matches the border radius of the container */
 }

@@ -1,12 +1,11 @@
 <?php
-include "layout/header.php";
+require_once  "layout/header.php";
  
 // Check if the user is logged in, otherwise redirect to login page
 if (!isset($_SESSION["email"])) {
     header("location: login.php");
     exit;
 }
-
 ?>
 
 <div class="container py-5">
@@ -49,5 +48,5 @@ if (!isset($_SESSION["email"])) {
 </div>
 
 <?php
-include "layout/footer.php";
+require_once  "layout/footer.php";
 ?>

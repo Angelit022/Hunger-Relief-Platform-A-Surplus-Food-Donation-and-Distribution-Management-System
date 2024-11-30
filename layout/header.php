@@ -36,13 +36,13 @@ $authenticated = isset($_SESSION["email"]);
 
                 <?php if ($authenticated): ?>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" href="search.php" onclick="toggleModal('searchModal')">Search Food</a>
+                        <a class="nav-link text-dark" href="search.php">Search Food</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" href="donate.php" >Donate</a>
+                        <a class="nav-link text-dark" href="donate_page.php" >Donate</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" href="#">Request</a>
+                        <a class="nav-link text-dark" href="donation_list.php">Request</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-dark" href="dashboard.php">Dashboard</a>

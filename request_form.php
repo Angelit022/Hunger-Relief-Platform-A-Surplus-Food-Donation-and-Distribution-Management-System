@@ -23,11 +23,25 @@ if ($donation_id) {
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Retrieve form data
     $name = $_POST['name'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
     $delivery_option = $_POST['delivery_option'];
     $notes = $_POST['special_notes'];
+
+    // Ensure donation_id is provided
+    if (!$donation_id) {
+        echo "<script>
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Donation ID is missing. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'Close'
+                });
+              </script>";
+        exit;
+    }
 
     // Check if the user has already made a request for the specific donation_id
     $stmt = $conn->prepare("SELECT COUNT(*) FROM donation_requests WHERE donation_id = ? AND requestor_email = ?");
@@ -39,50 +53,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($existing_request_count > 0) {
         // Show SweetAlert if the user has already requested the specific donation
-        echo "
-            <script>
+        echo "<script>
                 Swal.fire({
                     title: 'Request Already Submitted!',
                     text: 'You have already submitted a request for this donation.',
-                    confirmButtonText: 'OK',
                     icon: 'warning',
+                    confirmButtonText: 'OK',
                     willClose: () => {
                         window.location.href = 'donation_list.php';
                     }
                 });
-            </script>
-        ";
+              </script>";
     } else {
         // Proceed with adding the request
         $success = $requestManager->addRequest($name, $email, $phone, $delivery_option, $notes, $donation_id);
 
         if ($success) {
             // Display success message and trigger SweetAlert
-            echo "
-                <script>
+            echo "<script>
                     Swal.fire({
                         title: 'Request Submitted!',
                         text: 'Your request has been successfully recorded.',
-                        confirmButtonText: 'Close',
                         icon: 'success',
+                        confirmButtonText: 'Close',
                         willClose: () => {
                             window.location.href = 'donation_list.php';
                         }
                     });
-                </script>
-            ";
+                  </script>";
         } else {
             // If an error occurs during request submission
-            echo "
-                <script>
+            echo "<script>
                     Swal.fire({
                         title: 'Error!',
                         text: 'There was an issue submitting your request. Please try again later.',
-                        confirmButtonText: 'Close',
-                        icon: 'error'
+                        icon: 'error',
+                        confirmButtonText: 'Close'
                     });
-                </script>
-            ";
+                  </script>";
         }
     }
 }
@@ -124,6 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2>Request Form</h2>
 
         <form method="POST">
+            <input type="hidden" name="donation_id" value="<?= $donation_id; ?>"> <!-- Hidden field for donation_id -->
             <div class="form-group">
                 <label for="name" class="form-label">Your Name</label>
                 <input type="text" class="form-control" id="name" name="name" required>
@@ -136,8 +145,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="phone" class="form-label">Your Phone</label>
                 <input type="text" class="form-control" id="phone" name="phone" required>
             </div>
-
-            <!-- Delivery Option Dropdown -->
             <div class="form-group">
                 <label for="delivery_option" class="form-label">Delivery Option</label>
                 <select class="form-control" id="delivery_option" name="delivery_option" required>
@@ -146,19 +153,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <option value="Drop Off">Drop Off</option>
                 </select>
             </div>
-
-            <!-- Special Notes Textarea -->
             <div class="form-group">
                 <label for="special_notes" class="form-label">Special Notes</label>
                 <textarea class="form-control" id="special_notes" name="special_notes"></textarea>
             </div>
-
-            <!-- Button container for Cancel and Submit -->
             <div class="form-buttons">
                 <a href="donation_list.php" class="btn-cancel">Cancel</a>
                 <button type="submit" class="btn-submit">Submit Request</button>
             </div>
         </form>
+
     </div>
 </div>
 
