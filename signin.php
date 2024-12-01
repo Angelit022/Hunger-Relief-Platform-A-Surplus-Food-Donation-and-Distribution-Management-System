@@ -1,101 +1,155 @@
 <?php
-$userExists = 0;
-$errorMsg = '';
-$errorClass = '';
+require_once "layout/header.php";
+require_once "classes/user_service.php";
+
+if (isset($_SESSION["email"])) {
+    header("location: index.php");
+    exit;
+}
+
+$userService = new UserService();
+
+$first_name = $last_name = $email = $phone = $address = $password = $confirm_password = "";
+$first_name_error = $last_name_error = $email_error = $phone_error = $address_error = $password_error = $confirm_password_error = "";
+$error = false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    include 'db_connection.php';
-    
-    $name = trim($_POST['name']);
-    $address = trim($_POST['address']);
-    $email = trim($_POST['email']);
-    $mobile = trim($_POST['mobile']);
-    $message = trim($_POST['message']);
-    $password = trim($_POST['password']);
+    $first_name = $_POST['first_name'];
+    $last_name = $_POST['last_name'];
+    $email = $_POST['email'];
+    $phone = $_POST['phone'];
+    $address = $_POST['address'];
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
 
+    // Validation
+    if (empty($first_name)) {
+        $first_name_error = "First name is required";
+        $error = true;
+    }
+    if (empty($last_name)) {
+        $last_name_error = "Last name is required";
+        $error = true;
+    }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errorMsg = 'Invalid email format.';
-        $errorClass = 'alert-danger';
-    } elseif (!preg_match('/^[0-9]{11}$/', $mobile)) {
-        $errorMsg = 'Mobile number must be 11 digits.';
-        $errorClass = 'alert-danger';
-    } else {
-        $sql = "SELECT * FROM `register` WHERE `email_address`='$email'";
-        $result = mysqli_query($conn, $sql);
-        
-        if ($result) {
-            $num = mysqli_num_rows($result);
-            if ($num > 0) {
-                $userExists = 1;
-            } else {
-                $sql = "INSERT INTO `register` (name, address, email_address, contact_number, message, password) VALUES ('$name', '$address', '$email', '$mobile', '$message', '$password')";
-                $result = mysqli_query($conn, $sql);
-                header("Refresh: 1; url=index.php");
-                exit();
-            }
-        }
+        $email_error = "Email format is not valid";
+        $error = true;
+    } elseif ($userService->loginUser($email, $password)) { // Check if email is already used
+        $email_error = "Email is already used";
+        $error = true;
+    }
+    if (!preg_match("/^[0-9]{11}$/", $phone)) {
+        $phone_error = "Phone number must be exactly 11 digits";
+        $error = true;
+    }
+    if (strlen($password) < 6) {
+        $password_error = "Password must be at least 6 characters long.";
+        $error = true;
+    }
+    if ($password !== $confirm_password) {
+        $confirm_password_error = "Passwords do not match.";
+        $error = true;
+    }
+
+    // If no errors, proceed to register user
+    if (!$error) {
+        $user_id = $userService->registerUser($first_name, $last_name, $email, $phone, $address, $password);
+
+        // Store user session data
+        $_SESSION["user_id"] = $user_id;
+        $_SESSION["first_name"] = $first_name;
+        $_SESSION["last_name"] = $last_name;
+        $_SESSION["email"] = $email;
+        $_SESSION["phone"] = $phone;
+        $_SESSION["address"] = $address;
+        $_SESSION["created_at"] = date('Y-m-d H:i:s');
+
+        // Set success message in session
+        $_SESSION["registration_success"] = true;
+
+        // Redirect to homepage
+        header("Location: index.php");
+        exit();
     }
 }
 ?>
 
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Register Page</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="styles.css"> 
-</head>
-<body>
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-6 mx-auto border shadow p-4">
+      <h2 class="text-center mb-4">Register</h2>
+      <hr />
 
-<?php
-if ($errorMsg) {
-    echo '<div class="alert ' . $errorClass . ' alert-dismissible fade show fade-out" role="alert" style="animation-delay: 3s;">
-    <strong>Error:</strong> ' . htmlspecialchars($errorMsg) . '
-    </div>';
-}
+      <form method="post">
+        <div class="mb-3 row">
+          <label for="first_name" class="col-sm-4 col-form-label">First Name</label>
+          <div class="col-sm-8">
+            <input class="form-control" name="first_name" value="<?= htmlspecialchars($first_name) ?>">
+            <span class="text-danger"><?= htmlspecialchars($first_name_error) ?></span>
+          </div>
+        </div>
 
-if ($userExists) {
-    echo '<div class="alert alert-warning alert-dismissible fade show fade-out" role="alert" style="animation-delay: 3s;">
-    <strong>Oh no!.. </strong> A user with this email already exists!
-    </div>';
-}
-?>
+        <div class="mb-3 row">
+          <label for="last_name" class="col-sm-4 col-form-label">Last Name</label>
+          <div class="col-sm-8">
+            <input class="form-control" name="last_name" value="<?= htmlspecialchars($last_name) ?>">
+            <span class="text-danger"><?= htmlspecialchars($last_name_error) ?></span>
+          </div>
+        </div>
 
-<h1 class="text-center mt-5 text-primary">" Welcome to Hunger Relief Platform "</h1>
-<div class="container">
-    <div class="register-container">
-        <h2 class="register-title text-center mb-4">Register</h2>
-        <form action="signin.php" method="post"> 
-            <div class="form-group mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" placeholder="Enter name" name="name" required>
-            </div>
-            <div class="form-group mb-3">
-                <label for="address" class="form-label">Address</label>
-                <input type="text" class="form-control" id="address" placeholder="Enter address" name="address" required>
-            </div>
-            <div class="form-group mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" placeholder="Enter email" name="email" required>
-            </div>
-            <div class="form-group mb-3">
-                <label for="mobile" class="form-label">Mobile Number</label>
-                <input type="tel" class="form-control" id="mobile" placeholder="Enter mobile number" name="mobile" required>
-            </div>  
-            <div class="form-group mb-4">
-                <label for="message" class="form-label">Reason / Type of Food (Optional)</label>
-                <textarea class="form-control" id="message" placeholder="Enter reason or type of food" name="message"></textarea>
-            </div>
-            <div class="form-group mb-4">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Enter Password" name="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Register</button>
-        </form>
+        <div class="mb-3 row">
+          <label for="email" class="col-sm-4 col-form-label">Email</label>
+          <div class="col-sm-8">
+            <input class="form-control" name="email" value="<?= htmlspecialchars($email) ?>">
+            <span class="text-danger"><?= htmlspecialchars($email_error) ?></span>
+          </div>
+        </div>
+
+        <div class="mb-3 row">
+          <label for="phone" class="col-sm-4 col-form-label">Phone</label>
+          <div class="col-sm-8">
+            <input class="form-control" name="phone" value="<?= htmlspecialchars($phone) ?>">
+            <span class="text-danger"><?= htmlspecialchars($phone_error) ?></span>
+          </div>
+        </div>
+
+        <div class="mb-3 row">
+          <label for="address" class="col-sm-4 col-form-label">Address</label>
+          <div class="col-sm-8">
+            <input class="form-control" name="address" value="<?= htmlspecialchars($address) ?>">
+            <span class="text-danger"><?= htmlspecialchars($address_error) ?></span>
+          </div>
+        </div>
+
+        <div class="mb-3 row">
+          <label for="password" class="col-sm-4 col-form-label">Password</label>
+          <div class="col-sm-8">    
+            <input class="form-control" type="password" name="password">
+            <span class="text-danger"><?= htmlspecialchars($password_error) ?></span>
+          </div>
+        </div>
+
+        <div class="mb-3 row">
+          <label for="confirm_password" class="col-sm-4 col-form-label">Confirm Password</label>
+          <div class="col-sm-8">
+            <input class="form-control" type="password" name="confirm_password">
+            <span class="text-danger"><?= htmlspecialchars($confirm_password_error) ?></span>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="offset-sm-4 col-sm-4 d-grid">
+            <button type="submit" class="btn btn-primary">Register</button>
+          </div>
+          <div class="col-sm-4 d-grid">
+            <a href="index.php" class="btn btn-outline-primary">Cancel</a>
+          </div>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
-</body>
-</html>
+<?php
+require_once "layout/footer.php";
+?>
