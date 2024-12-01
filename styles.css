@@ -1,71 +1,62 @@
-body {
+.donation-form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
     background-color: #f8f9fa;
 }
 
-.register-container {
-    max-width: 500px;
-    margin: auto;
+
+.donor-info {
+    width: 100%;
+    max-width: 600px;
+    background-color: #fff;
     padding: 30px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    margin-top: 80px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
 }
 
-.register-title {
-    font-size: 24px;
-    font-weight: 700;
+.donor-info h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: #343a40;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    font-size: 1.1rem;
     color: #333;
 }
 
-nav {
-    background-color: #f8f9fa;
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
     padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-nav ul {
-    list-style-type: none;
-    padding: 0;
+.form-group textarea {
+    resize: vertical;
 }
 
-nav ul li {
-    display: inline;
-    margin-right: 15px;
+button.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background-color 0.3s;
 }
 
-nav ul li a {
-    text-decoration: none;
-    color: #007bff;
-}
-
-nav .search-form {
-    display: inline;
-}
-
-nav .search-form input {
-    padding: 5px;
-    margin-right: 5px;
-}
-
-.alert {
-    display: none; /* Hide the alert by default */
-}
-
-.show {
-    display: block; /* Show alert when this class is added */
-    animation: fadeIn 3s forwards; /* Fade in effect */
-}
-
-.fade-out {
-    animation: fadeOut 1s forwards; /* Fade out effect */
-}
-
-@keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
+button.btn-submit:hover {
+    background-color: #0056b3;
 }
