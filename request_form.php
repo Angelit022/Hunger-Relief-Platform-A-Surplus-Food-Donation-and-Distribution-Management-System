@@ -1,13 +1,12 @@
 <?php
-require_once "header.php";
-require_once "db_connection.php";
-require_once "RequestManager.php";
+require_once "layout/header.php";
+require_once "classes/db_connection.php";
+require_once "classes/RequestManager.php";
 
 // Initialize database connection
 $database = new Database();
 $conn = $database->getConnection();
 $requestManager = new RequestManager($conn);
-
 
 // Get donation_id from URL
 $donation_id = isset($_GET['donation_id']) ? intval($_GET['donation_id']) : null;
@@ -22,16 +21,15 @@ if ($donation_id) {
     $stmt->close();
 }
 
-
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form data
     $name = $_POST['name'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
+    $quantity = $_POST['quantity']; // Quantity field
     $delivery_option = $_POST['delivery_option'];
     $notes = $_POST['special_notes'];
-
 
     // Ensure donation_id is provided
     if (!$donation_id) {
@@ -46,7 +44,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-
     // Check if the user has already made a request for the specific donation_id
     $stmt = $conn->prepare("SELECT COUNT(*) FROM donation_requests WHERE donation_id = ? AND requestor_email = ?");
     $stmt->bind_param("is", $donation_id, $email);
@@ -54,7 +51,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_result($existing_request_count);
     $stmt->fetch();
     $stmt->close();
-
 
     if ($existing_request_count > 0) {
         // Show SweetAlert if the user has already requested the specific donation
@@ -71,8 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               </script>";
     } else {
         // Proceed with adding the request
-        $success = $requestManager->addRequest($name, $email, $phone, $delivery_option, $notes, $donation_id);
-
+        $success = $requestManager->addRequest($name, $email, $phone, $quantity, $delivery_option, $notes, $donation_id);
 
         if ($success) {
             // Display success message and trigger SweetAlert
@@ -102,7 +97,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -114,7 +108,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-
 
 <!-- Donation Form Container -->
 <div class="donation-form-container">
@@ -136,24 +129,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </p>
         </div>
     <?php endif; ?>
+
     <div class="donor-info">
         <h2>Request Form</h2>
 
-
         <form method="POST">
             <input type="hidden" name="donation_id" value="<?= $donation_id; ?>"> <!-- Hidden field for donation_id -->
+
+            <!-- Name -->
             <div class="form-group">
                 <label for="name" class="form-label">Your Name</label>
                 <input type="text" class="form-control" id="name" name="name" required>
             </div>
+
+            <!-- Email -->
             <div class="form-group">
                 <label for="email" class="form-label">Your Email</label>
                 <input type="email" class="form-control" id="email" name="email" required>
             </div>
+
+            <!-- Phone -->
             <div class="form-group">
                 <label for="phone" class="form-label">Your Phone</label>
                 <input type="text" class="form-control" id="phone" name="phone" required>
             </div>
+
+            <!-- Quantity -->
+            <div class="form-group">
+                <label for="quantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+            </div>
+
+            <!-- Delivery Option -->
             <div class="form-group">
                 <label for="delivery_option" class="form-label">Delivery Option</label>
                 <select class="form-control" id="delivery_option" name="delivery_option" required>
@@ -162,24 +169,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <option value="Drop Off">Drop Off</option>
                 </select>
             </div>
+
+            <!-- Special Notes -->
             <div class="form-group">
                 <label for="special_notes" class="form-label">Special Notes</label>
                 <textarea class="form-control" id="special_notes" name="special_notes"></textarea>
             </div>
+
+            <!-- Submit and Cancel Buttons -->
             <div class="form-buttons">
                 <a href="donation_list.php" class="btn-cancel">Cancel</a>
                 <button type="submit" class="btn-submit">Submit Request</button>
             </div>
         </form>
 
-
     </div>
 </div>
-
 
 </body>
 </html>
 
-
 <?php
-require_once "footer.php";
+require_once "layout/footer.php";
+?>
