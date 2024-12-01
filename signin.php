@@ -1,6 +1,6 @@
 <?php
-require_once "header.php";
-require_once "user_service.php";
+require_once "layout/header.php";
+require_once "classes/user_service.php";
 
 if (isset($_SESSION["email"])) {
     header("location: index.php");
@@ -53,28 +53,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // If no errors, proceed to register user
     if (!$error) {
-      $user_id = $userService->registerUser($first_name, $last_name, $email, $phone, $address, $password);
+        $user_id = $userService->registerUser($first_name, $last_name, $email, $phone, $address, $password);
 
-      // Store user session data
-      $_SESSION["user_id"] = $user_id;
-      $_SESSION["first_name"] = $first_name;
-      $_SESSION["last_name"] = $last_name;
-      $_SESSION["email"] = $email;
-      $_SESSION["phone"] = $phone;
-      $_SESSION["address"] = $address;
-      $_SESSION["created_at"] = date('Y-m-d H:i:s');
+        // Store user session data
+        $_SESSION["user_id"] = $user_id;
+        $_SESSION["first_name"] = $first_name;
+        $_SESSION["last_name"] = $last_name;
+        $_SESSION["email"] = $email;
+        $_SESSION["phone"] = $phone;
+        $_SESSION["address"] = $address;
+        $_SESSION["created_at"] = date('Y-m-d H:i:s');
 
-      // Set success message in session
-      $_SESSION["registration_success"] = true;
+        // Set success message in session
+        $_SESSION["registration_success"] = true;
 
-      // Redirect to homepage
-      header("Location: index.php");
-      exit();
+        // Redirect to homepage
+        header("Location: index.php");
+        exit();
     }
-
 }
 ?>
-
 
 <div class="container py-5">
   <div class="row">
@@ -153,24 +151,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 
 <?php
-// Check if registration was successful
-if (isset($_SESSION["registration_success"]) && $_SESSION["registration_success"] === true) {
-    // Display SweetAlert message
-    echo "<script>
-        Swal.fire({
-            position: 'top-center',
-            icon: 'success',
-            title: 'Registration successful! Welcome, " . htmlspecialchars($_SESSION['first_name']) . "!',
-            showConfirmButton: false,
-            timer: 2500
-        });
-    </script>";
-
-    // Clear the session variable after showing the message
-    unset($_SESSION["registration_success"]);
-}
-?>
-
-<?php
-require_once "footer.php";
+require_once "layout/footer.php";
 ?>
