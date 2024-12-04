@@ -48,16 +48,16 @@ nav .search-form input {
 }
 
 .alert {
-    display: none; /* Hide the alert by default */
+    display: none;
 }
 
 .show {
-    display: block; /* Show alert when this class is added */
-    animation: fadeIn 3s forwards; /* Fade in effect */
+    display: block;
+    animation: fadeIn 3s forwards;
 }
 
 .fade-out {
-    animation: fadeOut 1s forwards; /* Fade out effect */
+    animation: fadeOut 1s forwards;
 }
 
 @keyframes fadeIn {
