@@ -1,6 +1,6 @@
 <?php
-require_once "db_connection.php";
-require_once "RequestManager.php"; 
+require_once "classes/db_connection.php";
+require_once "classes/RequestManager.php"; 
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["id"])) {
     $database = new Database();
