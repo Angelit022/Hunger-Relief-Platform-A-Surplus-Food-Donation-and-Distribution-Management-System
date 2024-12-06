@@ -10,4 +10,5 @@ session_destroy();
 
 //Redirect to the homepage
 header("location: index.php");
+exit();
 ?>
