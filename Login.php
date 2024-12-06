@@ -3,10 +3,14 @@ require_once "layout/header.php";
 require_once "classes/user_service.php";
 
 if (isset($_SESSION["email"])) {
-    if ($_SESSION['role'] === 'admin') {
-        header("location: admin_dashboard.php"); // Redirect to admin dashboard
+    if ($_SESSION['role'] === 'donation_admin') {
+        header("location: AdminPanel/dashboard.php"); 
+    } elseif ($_SESSION['role'] === 'request_admin') {
+        header("location: AdminPanel/dashboard.php"); 
+    } elseif ($_SESSION['role'] === 'user_admin') {
+        header("location: AdminPanel/dashboard.php"); 
     } else {
-        header("location: index.php"); // Redirect to user homepage
+        header("location: index.php");
     }
     exit;
 }
@@ -27,21 +31,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Store user session data
             $_SESSION = $user;
 
-            if ($user['role'] === 'admin') {
-                // SweetAlert success message for admin login
+            if ($user['role'] === 'donation_admin') {
+            
                 echo "<script>
                         Swal.fire({
                             position: 'top-center',
                             icon: 'success',
-                            title: 'Welcome Admin!',
+                            title: 'Welcome Donation Admin!',
                             showConfirmButton: false,
                             timer: 2000
                         }).then(() => {
-                            window.location.href = 'AdminPanel/dashboard.php';  // Redirect after alert closes
+                            window.location.href = 'AdminPanel/dashboard.php'; 
                         });
                       </script>";
+            } elseif ($user['role'] === 'request_admin') {
+     
+                echo "<script>
+                        Swal.fire({
+                            position: 'top-center',
+                            icon: 'success',
+                            title: 'Welcome Request Admin!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(() => {
+                            window.location.href = 'AdminPanel/dashboard.php'; 
+                        });
+                      </script>";
+                    } elseif ($user['role'] === 'user_admin') {
+     
+                        echo "<script>
+                                Swal.fire({
+                                    position: 'top-center',
+                                    icon: 'success',
+                                    title: 'Welcome User Admin!',
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                }).then(() => {
+                                    window.location.href = 'AdminPanel/dashboard.php'; 
+                                });
+                              </script>";
             } else {
-                // SweetAlert success message for regular user login
+          
                 echo "<script>
                         Swal.fire({
                             position: 'top-center',
@@ -50,11 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             showConfirmButton: false,
                             timer: 2000
                         }).then(() => {
-                            window.location.href = 'index.php';  // Redirect after alert closes
+                            window.location.href = 'index.php';  
                         });
                       </script>";
             }
-            exit; // Ensure no further code is executed after the SweetAlert.
+            exit; 
         } else {
             $error = "Email or Password Invalid";
         }

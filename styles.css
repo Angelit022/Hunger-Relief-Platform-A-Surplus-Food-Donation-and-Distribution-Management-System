@@ -94,106 +94,69 @@ a.btn-cancel:hover {
     background-color: #d32f2f;
 }
 
-/* Donation Table Styles */
-.donation-dashboard-container {
-    max-width: 1200px;
+
+/* Donation Dashboard Container */
+.donation-dashboard-container,
+.request-dashboard-container {
+    max-width: 90%; 
     margin: 20px auto;
-    padding: 20px;
+    padding: 10px; 
     background-color: rgba(32, 178, 171, 0.591);
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; 
 }
 
-.donation-dashboard-container h2 {
+/* Heading styles */
+.donation-dashboard-container h2,
+.request-dashboard-container h2 {
     text-align: center;
     margin-bottom: 20px;
+    font-size: 1.5rem; 
 }
 
-.donation-table {
+/* Tables inside dashboards */
+.donation-table,
+.request-table {
     width: 100%;
-    font-size: 0.8rem; /* Reduced font size for compact table */
-    table-layout: fixed; /* Ensures all columns fit within the available space */
+    font-size: 0.85rem; 
+    table-layout: auto; 
 }
 
+/* Table headers and cells */
 .donation-table th,
-.donation-table td {
+.request-table th,
+.donation-table td,
+.request-table td {
     text-align: center;
     vertical-align: middle;
-    word-wrap: break-word;
+    padding: 6px;
+    word-wrap: break-word; 
+    background-color: whitesmoke;
 }
 
+/* Header background color and styles */
 .donation-table th {
     background-color: #fcfcb7;
+    color: #000;
+}
+
+.request-table th {
+    background-color: #fcfcb7;
     color: #000000;
-    padding: 10px;
 }
 
-.donation-table td {
-    padding: 8px;
-}
-
-/* Consistent Button Sizes */
-.btn-sm {
-    font-size: 0.875rem; /* Ensure font size is consistent */
-    padding: 8px 16px;    /* Set padding to make buttons equal in size */
-    width: 120px;         /* Fixed width for both buttons */
-    text-align: center;   /* Center text */
-}
-
-.donation-table .btn-warning,
-.donation-table .btn-danger {
-    width: 100%;
-    padding: 8px;
-}
-
+/* Button adjustments inside tables */
 .donation-table .btn-warning,
 .donation-table .btn-danger,
 .request-table .btn-warning,
 .request-table .btn-danger {
-    width: 80px;         /* Make buttons same width */
-    padding: 8px 16px;    /* Consistent padding */
+    width: 80%; 
+    padding: 6px;
+    font-size: 0.8rem; 
 }
 
-/* Adjusted Request Table */
-.request-dashboard-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: rgba(32, 178, 171, 0.559);
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
 
-.request-dashboard-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.request-table {
-    width: 100%;
-    font-size: 0.9rem; /* Smaller font for a compact table */
-}
-
-.request-table th,
-.request-table td {
-    text-align: center;
-    vertical-align: middle;
-}
-
-.request-table th {
-    background-color: #343a40;
-    color: #fff;
-}
-
-.request-table .btn-warning {
-    background-color: #f0ad4e;
-    border-color: #f0ad4e;
-}
-
-.request-table .btn-danger {
-    background-color: #d9534f;
-    border-color: #d9534f;
-}
 
 
 /*jerick's style*/
@@ -267,7 +230,7 @@ a.btn-cancel:hover {
 
 .btn-highlight {
     padding: 15px 30px;
-    background-color: #007bff;
+    background-color: #0066ff;
     color: white;
     border: none;
     border-radius: 5px;
@@ -277,7 +240,7 @@ a.btn-cancel:hover {
 }
 
 .btn-highlight:hover {
-    background-color: #0056b3;
+    background-color: #b33900;
     cursor: pointer;
 }
 
@@ -323,33 +286,34 @@ a.btn-cancel:hover {
 
 /* Adjusted Call-to-Action Section */
 .call-to-action {
-    background-image: url('images/donateNow.jpg'); /* Replace with the path to your image */
+    background-image: url('images/disaster.png'); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     text-align: center;
     padding: 60px;
-    color: white; /* Ensures text is readable on the image */
+    color: white; 
     position: relative;
-    max-width: 1000px; /* Set a maximum width */
-    margin: 50px auto; /* Center the box horizontally and add space at the top */
-    border-radius: 10px; /* Optional: adds rounded corners for a "boxy" look */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: adds a subtle shadow for depth */
+    max-width: 1000px;
+    margin: 50px auto; 
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
 }
 
-.call-to-action h2 {
+.call-to-action p {
     position: relative;
-    z-index: 5; /* Ensures text appears above the overlay */
-    margin-bottom: 20px; /* Adds space below the heading */
+    z-index: 5; 
+    margin-bottom: 20px; 
+    font-size: large;
 }
 
 .call-to-action a {
     position: relative;
-    z-index: 5; /* Ensures button appears above the overlay */
-    display: inline-block; /* Ensures margin works */
-    margin-top: 20px; /* Adds space above the button */
+    z-index: 5; 
+    display: inline-block; 
+    margin-top: 20px;
     padding: 15px 30px;
-    background-color: #1660ffb3;
+    background-color: #ff1616b3;
     color: white;
     border: none;
     border-radius: 5px;
@@ -371,7 +335,76 @@ a.btn-cancel:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.388); /* Adds a dark overlay for better text contrast */
+    background-color: rgba(0, 0, 0, 0.388); 
     z-index: 1;
-    border-radius: 10px; /* Matches the border radius of the container */
+    border-radius: 10px; 
+}
+
+.swal2-popup {
+    z-index: 99999 !important;
+}
+.donation-form-container {
+    z-index: 10;
+    position: relative;
+}
+
+
+
+/* for emergency */
+
+.emergency-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+.emergency-container h1 {
+    color: #29c07e;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.emergency-container p {
+    color: #555;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.emergency-container img {
+    width: 80%;
+    max-width: 300px;
+    margin: 20px auto;
+    display: block;
+}
+.buttons-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 30px;
+}
+.btns-highlight {
+
+    display: block;
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+.btns-highlight:hover {
+    background-color: #19dfa0;
+    color: #333;
+}
+#location-status {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 10px;
 }

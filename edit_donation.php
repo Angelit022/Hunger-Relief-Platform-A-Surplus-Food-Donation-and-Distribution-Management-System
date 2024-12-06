@@ -3,65 +3,89 @@ require_once "layout/header.php";
 require_once "classes/db_connection.php";
 require_once "classes/DonationManager.php";
 
+
 $database = new Database();
 $conn = $database->getConnection();
+
+// Create DonationManager instance
 $donationManager = new DonationManager($conn);
 
-$editData = null;
-$message = '';
-
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['edit'])) {
-    $editData = $donationManager->getDonationById($_POST['edit']);
+// Check if the user is logged in
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit();
 }
 
-// Handle update request
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['update'])) {
-    $id = $_POST['id'];
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $address = trim($_POST['address']);
-    $phone = trim($_POST['phone']);
-    $productsType = $_POST['ProductsType'];
-    $quantity = (int)$_POST['quantity'];
-    $productsCondition = implode(',', $_POST['condition'] ?? []);
-    $deliveryOption = $_POST['delivery_option'];
-    $messageInput = trim($_POST['message']);
+// Check if donation ID is provided
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    echo "Invalid request.";
+    exit();
+}
 
-    // Fetch original data
-    $originalData = $donationManager->getDonationById($id);
+$donationId = intval($_GET['id']);
 
-    // Check for changes
-    if (
-        $name === $originalData['name'] &&
-        $email === $originalData['email'] &&
-        $address === $originalData['address'] &&
-        $phone === $originalData['phone'] &&
-        $productsType === $originalData['products_type'] &&
-        $quantity == $originalData['quantity'] &&
-        $productsCondition === $originalData['products_condition'] &&
-        $deliveryOption === $originalData['delivery_option'] &&
-        $messageInput === $originalData['message']
-    ) {
-        $message = "No changes detected. Please modify at least one field.";
+// Fetch the donation details
+$donation = $donationManager->getDonationById($donationId);
+if (!$donation) {
+    exit();
+}
+
+
+$errorMessage = "";
+$successMessage = false;
+$infoMessage = "";
+
+// Handle form submission for updates
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Collect input data
+    $products_type = $_POST['products_type'] ?? '';
+    $quantity = intval($_POST['quantity'] ?? 0);
+    $products_condition = isset($_POST['products_condition']) ? implode(", ", $_POST['products_condition']) : '';
+    $phone = $_POST['phone'] ?? '';
+    $delivery_option = $_POST['delivery_option'] ?? '';
+    $message = trim($_POST['message'] ?? '');
+
+    // Validate inputs
+    if (empty($products_type) || empty($quantity) || empty($products_condition) || empty($phone) || empty($delivery_option)) {
+        $errorMessage = "Error: Please fill in all required fields.";
+    } elseif (!preg_match("/^\d{11}$/", $phone)) {
+        $errorMessage = "Error: Please enter a valid 11-digit phone number.";
+    } elseif (!in_array($delivery_option, ['Pick-up', 'Drop-off'])) {
+        $errorMessage = "Error: Invalid delivery option selected.";
     } else {
-        // Update the donation
-        $updateSuccess = $donationManager->updateDonation(
-            $id,
-            $name,
-            $email,
-            $address,
-            $phone,
-            $productsType,
-            $quantity,
-            $productsCondition,
-            $deliveryOption,
-            $messageInput
-        );
-        $message = $updateSuccess ? "Donation updated successfully!" : "Failed to update the donation. Please try again.";
-        
-        // Do not redirect here immediately, let SweetAlert handle the redirect
+        // Check if any changes were made
+        $changes_made = false;
+        if ($products_type !== $donation['products_type'] ||
+            $quantity !== intval($donation['quantity']) ||
+            $products_condition !== $donation['products_condition'] ||
+            $phone !== $donation['phone'] ||
+            $delivery_option !== $donation['delivery_option'] ||
+            $message !== $donation['message']) {
+            $changes_made = true;
+        }
+
+        if ($changes_made) {
+            if ($donationManager->updateDonation($donationId, $phone, $products_type, $quantity, $products_condition, $delivery_option, $message)) {
+                $donation = $donationManager->getDonationById($donationId);
+                $successMessage = true;
+            }
+       }
     }
 }
+
+// Fetch product types for dropdown
+$productTypesQuery = "SELECT DISTINCT products_type FROM donations";
+$productTypesResult = $conn->query($productTypesQuery);
+if ($productTypesResult === false) {
+    die( $conn->error);
+}
+
+$productTypes = [];
+while ($row = $productTypesResult->fetch_assoc()) {
+    $productTypes[] = $row['products_type'];
+}
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -70,106 +94,122 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['update'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Donation</title>
-    <link href="styles.css" rel="stylesheet">
-    <!-- SweetAlert Library -->
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        /* Custom CSS to ensure the form remains visible behind SweetAlert */
-        .swal2-popup {
-            z-index: 99999 !important;
-        }
-        .donation-form-container {
-            z-index: 10;
-            position: relative;
-        }
-    </style>
 </head>
 <body>
-<div class="donation-form-container">
-    <div class="donor-info">
-        <h2>Edit Donation</h2>
+    <div class="donation-form-container">
+        <div class="donor-info">
+            <h2>Edit Donation</h2>
 
-        <?php if ($editData): ?>
-            <form action="" method="POST" id="editDonationForm">
-                <input type="hidden" name="id" value="<?= $editData['id']; ?>">
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="<?= htmlspecialchars($editData['name']); ?>" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($editData['email']); ?>" required>
-                </div>
-                <div class="form-group">
-                    <label for="address">Address</label>
-                    <input type="text" class="form-control" id="address" name="address" value="<?= htmlspecialchars($editData['address']); ?>" required>
-                </div>
+            <?php if (!empty($errorMessage)): ?>
+                <div class="alert alert-danger" role="alert"><?= htmlspecialchars($errorMessage) ?></div>
+            <?php endif; ?>
+
+            <?php if (!empty($infoMessage)): ?>
+                <div class="alert alert-info" role="alert"><?= htmlspecialchars($infoMessage) ?></div>
+            <?php endif; ?>
+
+            <form method="POST" onsubmit="return validateForm()">
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" value="<?= htmlspecialchars($editData['phone']); ?>" required>
+                    <input type="text" id="phone" name="phone" class="form-control" value="<?= htmlspecialchars($donation['phone']) ?>" required>
                 </div>
                 <div class="form-group">
-                    <label for="products_type">Products Type</label>
-                    <select class="form-control" id="products_type" name="ProductsType" required>
-                        <option value="Beverages" <?= ($editData['products_type'] == 'Beverages') ? 'selected' : ''; ?>>Beverages</option>
-                        <option value="Canned Goods" <?= ($editData['products_type'] == 'Canned Goods') ? 'selected' : ''; ?>>Canned Goods</option>
-                        <option value="Fresh Produce" <?= ($editData['products_type'] == 'Fresh Produce') ? 'selected' : ''; ?>>Fresh Produce</option>
-                        <option value="Packaged Meals" <?= ($editData['products_type'] == 'Packaged Meals') ? 'selected' : ''; ?>>Packaged Meals</option>
-                        <option value="Household Care" <?= ($editData['products_type'] == 'Household Care') ? 'selected' : ''; ?>>Household Care</option>
-                        <option value="Personal Care" <?= ($editData['products_type'] == 'Personal Care') ? 'selected' : ''; ?>>Personal Care</option>
+                    <label for="products_type">Product Type</label>
+                    <select id="products_type" name="products_type" class="form-control" required>
+                        <?php foreach ($productTypes as $type): ?>
+                            <option value="<?= htmlspecialchars($type) ?>" <?= $type == $donation['products_type'] ? 'selected' : '' ?>><?= htmlspecialchars($type) ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="quantity">Quantity</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" value="<?= htmlspecialchars($editData['quantity']); ?>" required>
+                    <input type="number" id="quantity" name="quantity" class="form-control" value="<?= htmlspecialchars($donation['quantity']) ?>" required>
                 </div>
                 <div class="form-group">
-                    <label>Products Condition</label><br>
-                    <input type="checkbox" name="condition[]" value="Unopened" <?= in_array('Unopened', explode(',', $editData['products_condition'])) ? 'checked' : ''; ?>> Unopened
-                    <input type="checkbox" name="condition[]" value="Properly Packaged" <?= in_array('Properly Packaged', explode(',', $editData['products_condition'])) ? 'checked' : ''; ?>> Properly Packaged
-                    <input type="checkbox" name="condition[]" value="Within Expiry Date" <?= in_array('Within Expiry Date', explode(',', $editData['products_condition'])) ? 'checked' : ''; ?>> Within Expiry Date
+                    <label>Condition of Food</label><br>
+                    <input type="checkbox" id="unopened_condition" name="products_condition[]" value="Unopened" <?= in_array('Unopened', explode(", ", $donation['products_condition'])) ? 'checked' : '' ?>>
+                    <label for="unopened_condition">Unopened</label>
+                    <input type="checkbox" id="packaged_condition" name="products_condition[]" value="Properly Packaged" <?= in_array('Properly Packaged', explode(", ", $donation['products_condition'])) ? 'checked' : '' ?>>
+                    <label for="packaged_condition">Properly Packaged</label>
+                    <input type="checkbox" id="expiry_condition" name="products_condition[]" value="Within Expiry Date" <?= in_array('Within Expiry Date', explode(", ", $donation['products_condition'])) ? 'checked' : '' ?>>
+                    <label for="expiry_condition">Within Expiry Date</label>
                 </div>
                 <div class="form-group">
-                    <label for="delivery_option">Delivery Option</label><br>
-                    <input type="radio" name="delivery_option" value="Pick-up" <?= ($editData['delivery_option'] == 'Pick-up') ? 'checked' : ''; ?>> Pick-up
-                    <input type="radio" name="delivery_option" value="Drop-off" <?= ($editData['delivery_option'] == 'Drop-off') ? 'checked' : ''; ?>> Drop-off
+                    <label>Pick-up or Drop-off Option</label><br>
+                    <input type="radio" name="delivery_option" value="Pick-up" <?= $donation['delivery_option'] === 'Pick-up' ? 'checked' : '' ?> required> Pick-up
+                    <input type="radio" name="delivery_option" value="Drop-off" <?= $donation['delivery_option'] === 'Drop-off' ? 'checked' : '' ?> required> Drop-off
                 </div>
                 <div class="form-group">
-                    <label for="message">Message (Optional)</label>
-                    <textarea class="form-control" id="message" name="message" rows="4"><?= htmlspecialchars($editData['message']); ?></textarea>
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" class="form-control"><?= htmlspecialchars($donation['message'] ?? '') ?></textarea>
                 </div>
                 <div class="form-buttons">
                     <a href="dashboard.php" class="btn-cancel">Cancel</a>
-                    <button type="submit" class="btn-submit" name="update">Update</button>
+                    <button type="submit" class="btn-submit">Update</button>
                 </div>
             </form>
-
-        <?php endif; ?>
+        </div>
     </div>
-</div>
 
-<?php if ($message): ?>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+    function validateForm() {
+        var phone = document.getElementById('phone').value;
+        var quantity = document.getElementById('quantity').value;
+        var conditions = document.querySelectorAll('input[name="products_condition[]"]:checked');
+        var deliveryOption = document.querySelector('input[name="delivery_option"]:checked');
+
+        if (!phone || !quantity || conditions.length === 0 || !deliveryOption) {
             Swal.fire({
-                title: "<?= $message === 'Donation updated successfully!' ? 'Success' : 'Error' ?>",
-                text: "<?= $message; ?>",
-                icon: "<?= $message === 'Donation updated successfully!' ? 'success' : 'error' ?>",
-                confirmButtonText: "OK",
-                allowOutsideClick: false,  // Prevent click outside to close
-                willClose: () => {
-                    window.location.href = "dashboard.php";  // Redirect to dashboard after alert
+                icon: 'error',
+                title: 'Error',
+                text: 'Please fill in all required fields.',
+            });
+            return false;
+        }
+
+        if (!/^\d{11}$/.test(phone)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Please enter a valid 11-digit phone number.',
+            });
+            return false;
+        }
+
+        return true;
+    }
+    </script>
+
+    <?php if ($successMessage): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Donation Updated Successfully',
+                text: 'Your donation details have been updated!',
+                confirmButtonText: 'Okay',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'dashboard.php'; 
                 }
             });
-        });
-    </script>
-<?php endif; ?>
-
-
+        </script>
+    <?php elseif (!empty($infoMessage)): ?>
+        <script>
+            Swal.fire({
+                icon: 'info',
+                title: 'No Changes Made',
+                text: '<?= htmlspecialchars($infoMessage) ?>',
+                confirmButtonText: 'Okay',
+            });
+        </script>
+    <?php endif; ?>
 </body>
 </html>
 
-
 <?php
-include "layout/footer.php";
+require_once "layout/footer.php";
 ?>
+

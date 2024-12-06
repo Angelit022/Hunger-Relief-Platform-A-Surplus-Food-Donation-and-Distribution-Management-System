@@ -1,21 +1,25 @@
 <?php
 session_start();
 
-// Check if the user is an admin
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['role']) || 
+($_SESSION['role'] !== 'donation_admin' && $_SESSION['role'] !== 'request_admin' && $_SESSION['role'] !== 'user_admin')) {
     header("Location: Login.php");
     exit();
-}   
+}
 
-require_once "../classes/admin_dashboard.php";
+require_once "../classAdmin/adminClass.php";
 
-// Create an instance of the AdminDashboard class
-$adminDashboard = new AdminDashboard();
+// Get admin class instance
+$adminDashboard = new AdminClass();
 
-// Get the total donations, total requests, and total users
+// Get data
 $totalDonations = $adminDashboard->getTotalDonations();
 $totalRequests = $adminDashboard->getTotalRequests();
 $totalUsers = $adminDashboard->getTotalUsers();
+$totalEmergencyRequests = $adminDashboard->getTotalEmergencyRequests();
+
+// Get the current logged-in admin's role
+$adminRole = $_SESSION['role'];
 ?>
 
 <!DOCTYPE html>
@@ -27,17 +31,16 @@ $totalUsers = $adminDashboard->getTotalUsers();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="adminStyles.css">
-
 </head>
 <body>
     <?php require_once "adminSidebar.php"; ?>
 
-    <div class="main-content container mt-4">
+    <div class="main-content container mt-5">
         <h1 class="text-center">DASHBOARD</h1>
         <div class="row mt-5">
-            <!-- Total Donations -->
-            <div class="col-md-4">
-                <a href="manageDonation.php" class="text-decoration-none text-dark">
+         
+            <div class="col-md-3">
+                <div class="text-decoration-none text-dark">
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
                             <i class="fas fa-hand-holding-heart fa-3x text-primary"></i>
@@ -45,12 +48,11 @@ $totalUsers = $adminDashboard->getTotalUsers();
                             <p class="number fs-4"><?php echo $totalDonations; ?></p>
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
-
-            <!-- Total Requests -->
-            <div class="col-md-4">
-                <a href="requestManager.php" class="text-decoration-none text-dark">
+      
+            <div class="col-md-3">
+                <div class="text-decoration-none text-dark">
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
                             <i class="fas fa-envelope-open-text fa-3x text-success"></i>
@@ -58,12 +60,11 @@ $totalUsers = $adminDashboard->getTotalUsers();
                             <p class="number fs-4"><?php echo $totalRequests; ?></p>
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
-
-            <!-- Total Users -->
-            <div class="col-md-4">
-                <a href="userManager.php" class="text-decoration-none text-dark">
+    
+            <div class="col-md-3">
+                <div href="manageUser.php" class="text-decoration-none text-dark">
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
                             <i class="fas fa-users fa-3x text-info"></i>
@@ -71,7 +72,19 @@ $totalUsers = $adminDashboard->getTotalUsers();
                             <p class="number fs-4"><?php echo $totalUsers; ?></p>
                         </div>
                     </div>
-                </a>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="text-decoration-none text-dark">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                            <h5 class="card-title mt-3">Emergency Requests</h5>
+                            <p class="number fs-4"><?php echo $totalEmergencyRequests; ?></p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

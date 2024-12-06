@@ -3,7 +3,6 @@ require_once "layout/header.php";
 require_once "classes/db_connection.php";
 require_once "classes/DonationManager.php";
 
-// Create Database connection
 $database = new Database();
 $conn = $database->getConnection();
 $donationManager = new DonationManager($conn);
@@ -11,8 +10,6 @@ $donationManager = new DonationManager($conn);
 // Initialize the search query variable
 $searchQuery = '';
 $donations = [];
-
-// mula po dito hangang sa baba
 
 // Check if a search query is set in the URL
 if (isset($_GET['search'])) {
@@ -33,11 +30,11 @@ if (isset($_GET['search'])) {
     <style>
         .search-container, .table-container {
             width: 75%;
-            margin: 0 auto; /* Center align the container */
+            margin: 0 auto;
         }
         .btn-request {
             display: block;
-            margin: 20px auto; /* Center align the button */
+            margin: 20px auto;
         }
     </style>
 </head>
@@ -46,10 +43,10 @@ if (isset($_GET['search'])) {
     <div class="search-container">
         <h2 class="mb-4 text-center">Search Donations</h2>
 
-        <!-- Search Form -->
+      
         <form method="GET" action="search.php" class="d-flex justify-content-center">
             <div class="input-group mb-4">
-                <input type="text" class="form-control" name="search" placeholder="Search by Food Type or Product Type" value="<?= $searchQuery ?>" aria-label="Search">
+                <input type="text" class="form-control" name="search" placeholder="Search by Product Type" value="<?= $searchQuery ?>" aria-label="Search">
                 <button class="btn btn-primary" type="submit">Search</button>
             </div>
         </form>
@@ -59,14 +56,14 @@ if (isset($_GET['search'])) {
         <?php if (count($donations) > 0): ?>
             <div class="table-container">
                 <h4 class="text-center">Results for: <?= htmlspecialchars($searchQuery) ?></h4>
-
-                <!-- Display donations in table format -->
+                
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover">
                         <thead class="thead-dark">
                             <tr>
                                 <th>Product Type</th>
                                 <th>Total Quantity</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -74,14 +71,18 @@ if (isset($_GET['search'])) {
                                 <tr>
                                     <td><?= htmlspecialchars($donation["products_type"]); ?></td>
                                     <td><?= htmlspecialchars($donation["total_quantity"]); ?></td>
+                                    <td>
+                                        <form action="request_form.php" method="GET">
+                                            <input type="hidden" name="donation_id" value="<?= htmlspecialchars($donation['latest_donation_id']); ?>">
+                                            <input type="hidden" name="search" value="<?= htmlspecialchars($searchQuery); ?>">
+                                            <button type="submit" class="btn btn-primary">Request</button>
+                                        </form>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
-                
-                <!-- Request Button -->
-                <a href="request_form.php?search=<?= urlencode($searchQuery); ?>" class="btn btn-primary btn-request">Request</a>
             </div>
         <?php else: ?>
             <p class="mt-3 text-center">No donations found for "<strong><?= htmlspecialchars($searchQuery) ?></strong>".</p>

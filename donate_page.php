@@ -34,8 +34,10 @@ require_once "layout/header.php";
     </div>
 
     <div class="call-to-action">
-        <h2>Ready to change lives?</h2>
-        <a href="donate.php" class="btn-highlight">Donate Now</a>
+    <p>
+        <strong> This Emergency Request Button is for urgent assistance only. <br> By clicking, you consent to share your location and details for immediate help. Use responsibly.</strong>
+    </p>
+        <a href="emergency.php" class="btn-highlight">Emergency</a>
     </div>
 </body>
 </html>

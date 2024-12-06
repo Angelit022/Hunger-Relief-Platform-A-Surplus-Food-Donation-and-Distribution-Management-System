@@ -1,11 +1,13 @@
 <?php
 require_once "db_connection.php";
+require_once "classAdmin/admin_service.php";
 
 class UserService extends Database {
-    private $adminCredentials = [
-        'email' => 'admin@gmail.com',
-        'password' => 'admin123' // Ideally, use a hashed password in production
-    ];
+    private $adminService;
+
+    public function __construct() {
+        $this->adminService = new AdminService();
+    }
 
     public function registerUser($first_name, $last_name, $email, $phone, $address, $password) {
         $connection = $this->getConnection();
@@ -23,18 +25,19 @@ class UserService extends Database {
     }
 
     public function loginUser($email, $password) {
-        // Check if the credentials match the admin credentials
-        if ($email === $this->adminCredentials['email'] && $password === $this->adminCredentials['password']) {
+        $adminRole = $this->adminService->getAdminRole($email, $password);
+        if ($adminRole) {
+            // Set session role for admin
+            $_SESSION['role'] = $adminRole;
             return [
                 "user_id" => 0,
-                "first_name" => "Admin",
-                "last_name" => "User",
-                "email" => $this->adminCredentials['email'],
-                "role" => "admin"
+                "first_name" => ucfirst($adminRole),
+                "last_name" => "Admin",
+                "email" => $email,
+                "role" => $adminRole
             ];
         }
 
-        // Check in the database for regular users
         $connection = $this->getConnection();
 
         $stmt = $connection->prepare("SELECT user_id, first_name, last_name, email, phone, address, password, created_at FROM users WHERE email = ?");
@@ -44,6 +47,7 @@ class UserService extends Database {
 
         if ($stmt->fetch() && password_verify($password, $stored_password)) {
             $stmt->close();
+            $_SESSION['role'] = 'user';  
             return [
                 "user_id" => $user_id,
                 "first_name" => $first_name,
