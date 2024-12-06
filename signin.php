@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $email_error = "Email format is not valid";
         $error = true;
-    } elseif ($userService->loginUser($email, $password)) { // Check if email is already used
+    } elseif ($userService->loginUser($email, $password)) { 
         $email_error = "Email is already used";
         $error = true;
     }
@@ -57,17 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Store user session data
         $_SESSION["user_id"] = $user_id;
-        $_SESSION["first_name"] = $first_name;
-        $_SESSION["last_name"] = $last_name;
-        $_SESSION["email"] = $email;
+        $_SESSION["first_name"] = $first_name; 
+        $_SESSION["last_name"] = $last_name; 
+        $_SESSION["email"] = $email; 
         $_SESSION["phone"] = $phone;
-        $_SESSION["address"] = $address;
+        $_SESSION["address"] = $address; 
         $_SESSION["created_at"] = date('Y-m-d H:i:s');
 
-        // Set success message in session
         $_SESSION["registration_success"] = true;
-
-        // Redirect to homepage
         header("Location: index.php");
         exit();
     }
