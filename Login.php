@@ -1,99 +1,132 @@
-<?php
-$loginError = '';
+<?php 
+require_once "layout/header.php";
+require_once "classes/user_service.php";
+
+if (isset($_SESSION["email"])) {
+    if ($_SESSION['role'] === 'donation_admin') {
+        header("location: AdminPanel/dashboard.php"); 
+    } elseif ($_SESSION['role'] === 'request_admin') {
+        header("location: AdminPanel/dashboard.php"); 
+    } elseif ($_SESSION['role'] === 'user_admin') {
+        header("location: AdminPanel/dashboard.php"); 
+    } else {
+        header("location: index.php");
+    }
+    exit;
+}
+
+$email = $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    include 'db_connection.php'; 
-    $username = $_POST['username'];
+    $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Handle login
-    if (isset($_POST['action']) && $_POST['action'] == 'login') {
-      
-        $sql = "SELECT * FROM signin WHERE username='$username'";
-        $result = mysqli_query($conn, $sql);
-        
-        if ($result) {
-            $user = mysqli_fetch_assoc($result); 
-            if ($user && password_verify($password, $user['password'])) { 
-                // Login successful, redirect or set session
-                header('Location: welcome.php'); 
-                exit();
+    if (empty($email) || empty($password)) {
+        $error = "Email and Password are required!";
+    } else {
+        $userService = new UserService();
+        $user = $userService->loginUser($email, $password);
+
+        if ($user) {
+            // Store user session data
+            $_SESSION = $user;
+
+            if ($user['role'] === 'donation_admin') {
+            
+                echo "<script>
+                        Swal.fire({
+                            position: 'top-center',
+                            icon: 'success',
+                            title: 'Welcome Donation Admin!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(() => {
+                            window.location.href = 'AdminPanel/dashboard.php'; 
+                        });
+                      </script>";
+            } elseif ($user['role'] === 'request_admin') {
+     
+                echo "<script>
+                        Swal.fire({
+                            position: 'top-center',
+                            icon: 'success',
+                            title: 'Welcome Request Admin!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(() => {
+                            window.location.href = 'AdminPanel/dashboard.php'; 
+                        });
+                      </script>";
+                    } elseif ($user['role'] === 'user_admin') {
+     
+                        echo "<script>
+                                Swal.fire({
+                                    position: 'top-center',
+                                    icon: 'success',
+                                    title: 'Welcome User Admin!',
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                }).then(() => {
+                                    window.location.href = 'AdminPanel/dashboard.php'; 
+                                });
+                              </script>";
             } else {
-                $loginError = "Invalid username or password."; 
+          
+                echo "<script>
+                        Swal.fire({
+                            position: 'top-center',
+                            icon: 'success',
+                            title: 'Successfully logged in!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(() => {
+                            window.location.href = 'index.php';  
+                        });
+                      </script>";
             }
+            exit; 
         } else {
+            $error = "Email or Password Invalid";
         }
     }
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
- <meta charset="utf-8">
- <meta name="viewport" content="width=device-width, initial-scale=1">
- <title>Login Page</title>
- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
- <style>
- body {
- background-color: #f8f9fa;
- }
- .form-container {
- max-width: 400px;
- margin: auto;
- padding: 30px;
- background-color: #ffffff;
- border-radius: 10px;
- box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-margin-top: 80px;
- }
-.title {
-font-size: 24px;
- font-weight: 700;
-color: #333;
- }
-.footer-link {
- text-align: center;
-  margin-top: 10px;
-}
- .footer-link a {
-color: #007bff;
- text-decoration: none;
- }
- .footer-link a:hover {
- text-decoration: underline;
- }
- </style>
-</head>
-<body>
+<div class="container py-5">
+    <div class="col-md-6 col-lg-4 mx-auto border shadow-sm p-4 rounded">
+        <h2 class="text-center mb-4">Login</h2>
+        <hr />
 
-<h2 class="text-center mt-5 text-primary">Welcome to Hunger Relief Platform</h2>
-<div class="container">
-<div class="form-container">
-<h2 class="title text-center mb-4">Login</h2>
- <form action="login.php" method="post">
-<input type="hidden" name="action" value="login"> <!-- Hidden field for login action -->
- <div class="mb-3">
- <label for="username" class="form-label">Username:</label>
-<input type="text" id="username" name="username" class="form-control" required>
- </div>
- <div class="mb-3">
- <label for="password" class="form-label">Password:</label>
- <input type="password" id="password" name="password" class="form-control" required>
- </div>
- <button type="submit" class="btn btn-primary w-100">Login</button>
+        <?php if(!empty($error)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><?= $error ?></strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
 
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input class="form-control" name="email" value="<?= $email ?>" />
+            </div>
 
-  <!-- Display login error message -->
-<?php 
-    if (!empty($loginError)) {
-        echo $loginError;
-    }
- ?>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input class="form-control" type="password" name="password" />
+            </div>
 
- </form>
- </div>
+            <div class="row mb-3">
+                <div class="col d-grid">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+                <div class="col d-grid">
+                    <a href="index.php" class="btn btn-outline-primary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
-</body>
-</html>
+<?php
+require_once "layout/footer.php";
+?>
