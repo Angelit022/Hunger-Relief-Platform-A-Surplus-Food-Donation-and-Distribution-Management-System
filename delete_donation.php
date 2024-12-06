@@ -2,12 +2,19 @@
 require_once "classes/db_connection.php";
 require_once "classes/DonationManager.php";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["id"])) {
+session_start();
+
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit();
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["cancel_id"])) {
     $database = new Database();
     $conn = $database->getConnection();
     $donationManager = new DonationManager($conn);
 
-    $id = htmlspecialchars(trim($_POST["id"]));
+    $id = htmlspecialchars(trim($_POST["cancel_id"]));
 
     if ($donationManager->deleteDonation($id)) {
         echo "
@@ -23,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["id"])) {
         <script>
         Swal.fire({
             title: 'Success!',
-            text: 'Donation Canceled successfully!',
+            text: 'Donation canceled successfully!',
             icon: 'success'
         }).then((result) => {
             if (result.isConfirmed) {
@@ -62,3 +69,4 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["id"])) {
     header("Location: dashboard.php");
     exit();
 }
+?>
