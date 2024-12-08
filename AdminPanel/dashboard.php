@@ -12,13 +12,11 @@ require_once "../classAdmin/adminClass.php";
 // Get admin class instance
 $adminDashboard = new AdminClass();
 
-// Get data
 $totalDonations = $adminDashboard->getTotalDonations();
 $totalRequests = $adminDashboard->getTotalRequests();
 $totalUsers = $adminDashboard->getTotalUsers();
 $totalEmergencyRequests = $adminDashboard->getTotalEmergencyRequests();
 
-// Get the current logged-in admin's role
 $adminRole = $_SESSION['role'];
 ?>
 

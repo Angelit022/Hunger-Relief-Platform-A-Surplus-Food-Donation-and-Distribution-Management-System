@@ -29,7 +29,7 @@ class RequestManager {
             $stmtCheckDonation->close();
     
             if ($row['count'] == 0) {
-                return false; // Invalid donation ID
+                return false; 
             }
         }
     
@@ -97,24 +97,44 @@ class RequestManager {
     }
     
 
-    public function updateRequest($id, $name, $email, $phone, $delivery_option, $notes, $address, $quantity, $status) {
-        $query = "
-            UPDATE donation_requests 
-            SET requestor_name = ?, 
-                requestor_email = ?, 
-                requestor_phone = ?, 
-                delivery_option = ?, 
-                special_notes = ?, 
-                requestor_address = ?, 
-                quantity = ?, 
-                status = ? 
-            WHERE requestor_id = ?";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bind_param("ssssssisi", $name, $email, $phone, $delivery_option, $notes, $address, $quantity, $status, $id);
-        $success = $stmt->execute();
-        $stmt->close();
-        return $success;
+    public function updateRequest($id, $phone, $delivery_option, $notes, $address, $quantity, $previousQuantity) {
+        $this->conn->begin_transaction();
+
+        try {
+            // Update the request
+            $query = "
+                UPDATE donation_requests 
+                SET requestor_phone = ?, 
+                    delivery_option = ?, 
+                    special_notes = ?, 
+                    requestor_address = ?, 
+                    quantity = ?
+                WHERE requestor_id = ?";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param("ssssis", $phone, $delivery_option, $notes, $address, $quantity, $id);
+            $stmt->execute();
+
+            // Update the donation quantity
+            $quantityDifference = $quantity - $previousQuantity;
+            $updateDonationQuery = "
+                UPDATE donations d
+                JOIN donation_requests dr ON d.id = dr.donation_id
+                SET d.quantity = d.quantity - ?
+                WHERE dr.requestor_id = ?";
+
+            $updateDonationStmt = $this->conn->prepare($updateDonationQuery);
+            $updateDonationStmt->bind_param("ii", $quantityDifference, $id);
+            $updateDonationStmt->execute();
+
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            return false;
+        }
     }
+    
 
     public function updateDonationQuantity($donationId, $deductedQuantity) {
         $this->conn->begin_transaction();
@@ -126,7 +146,7 @@ class RequestManager {
             $stmt->bind_param("ii", $deductedQuantity, $donationId);
             $stmt->execute();
 
-            // Check if the quantity is now zero and update the status if necessary
+            // Check if the quantity is now zero and update the status
             $checkQuery = "SELECT quantity FROM donations WHERE id = ?";
             $checkStmt = $this->conn->prepare($checkQuery);
             $checkStmt->bind_param("i", $donationId);
@@ -149,7 +169,13 @@ class RequestManager {
         }
     }
 
-    // Get all requests with full details (including donation and donor info)
+    public function getRequestQuantities() {
+        $query = "SELECT requestor_id, quantity FROM donation_requests";
+        $result = $this->conn->query($query);
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+
     public function getAllRequests() {
                 $query = "SELECT 
                 dr.requestor_id AS request_id, 
@@ -176,7 +202,7 @@ class RequestManager {
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    // Get a single request with full details
+    // Get a single request
     public function getRequestById($requestId) {
         $query = "SELECT 
                     dr.requestor_id AS request_id, 
@@ -186,6 +212,7 @@ class RequestManager {
                     dr.delivery_option,
                     dr.special_notes,
                     dr.status AS request_status,
+                    d.id AS donation_id,
                     d.products_type,
                     d.products_condition,
                     d.quantity AS available_quantity,
@@ -245,3 +272,4 @@ class RequestManager {
     
 }
 ?>
+
