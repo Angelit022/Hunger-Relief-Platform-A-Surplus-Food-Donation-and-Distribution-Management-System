@@ -4,12 +4,14 @@ require_once 'adminSidebar.php';
 require_once '../classAdmin/adminClass.php';
 require_once '../classAdmin/ActionHandler.php';
 require_once '../classes/db_connection.php';
+require_once '../classes/RequestManager.php';
 
 // Initialize Database and Classes
 $database = new Database();
 $db = $database->getConnection();
 $actionHandler = new ActionHandler($db);
 $admin = new AdminClass();
+$requestManager = new RequestManager($db);
 
 $statusMessage = "";
 
@@ -17,18 +19,19 @@ $statusMessage = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'], $_GET['request_id'])) {
     $action = $_GET['action'];
     $requestId = $_GET['request_id'];
+    $table = 'donation_requests';
 
     switch ($action) {
         case 'Accepted':
-            $result = $actionHandler->approveRecord($requestId, 'donation_requests');
+            $result = $actionHandler->approveRecord($requestId, $table);
             $statusMessage = $result ? "Request Accepted successfully!" : "Failed to Accept Request!";
             break;
         case 'Rejected':
-            $result = $actionHandler->rejectRecord($requestId, 'donation_requests');
+            $result = $actionHandler->rejectRecord($requestId, $table);
             $statusMessage = $result ? "Request Rejected successfully!" : "Failed to Reject Request!";
             break;
         case 'Fulfilled':
-            $result = $actionHandler->fulfillRecord($requestId, 'donation_requests');
+            $result = $actionHandler->fulfillRecord($requestId, $table);
             $statusMessage = $result ? "Request Fulfilled successfully!" : "Failed to Fulfill Request!";
             break;
         default:
@@ -38,6 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'], $_GET['reques
 
 // Fetch donation requests from the database
 $requests = $admin->getDonationRequests();
+
+// Fetch quantities from the RequestManager
+$quantities = $requestManager->getRequestQuantities();
+$quantityMap = array();
+foreach ($quantities as $quantity) {
+    $quantityMap[$quantity['requestor_id']] = $quantity['quantity'];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -56,13 +67,11 @@ $requests = $admin->getDonationRequests();
 
 <div class="main-content container mt-4">
 <h1 class="text-center">Requests Manager</h1>
->
     <?php if ($statusMessage): ?>
         <div class="alert alert-info">
             <?= htmlspecialchars($statusMessage); ?>
         </div>
     <?php endif; ?>
-
 
     <table id="requestTable" class="table table-striped">
         <thead>
@@ -74,9 +83,9 @@ $requests = $admin->getDonationRequests();
             <th>Phone</th>
             <th>Address</th>
             <th>Product Type</th>
-            <th>Quantity </th>
-            <th>Condition </th>
-            <th>Delivery </th>
+            <th>Requested Quantity</th>
+            <th>Condition</th>
+            <th>Delivery</th>
             <th>Special Notes</th>
             <th>Status</th>
             <th>Actions</th>
@@ -93,7 +102,7 @@ $requests = $admin->getDonationRequests();
                 <td><?= isset($request['requestor_phone']) ? htmlspecialchars($request['requestor_phone']) : 'N/A'; ?></td>
                 <td><?= isset($request['requestor_address']) ? htmlspecialchars($request['requestor_address']) : 'N/A'; ?></td>
                 <td><?= isset($request['donation_product_type']) ? htmlspecialchars($request['donation_product_type']) : 'N/A'; ?></td>
-                <td><?= isset($request['donation_quantity']) ? htmlspecialchars($request['donation_quantity']) : 'N/A'; ?></td>
+                <td><?= isset($quantityMap[$request['requestor_id']]) ? htmlspecialchars($quantityMap[$request['requestor_id']]) : 'N/A'; ?></td>
                 <td><?= isset($request['donation_condition']) ? htmlspecialchars($request['donation_condition']) : 'N/A'; ?></td>
                 <td><?= isset($request['donation_delivery_option']) ? htmlspecialchars($request['donation_delivery_option']) : 'N/A'; ?></td>
                 <td><?= isset($request['special_notes']) ? htmlspecialchars($request['special_notes']) : 'N/A'; ?></td>
@@ -126,3 +135,4 @@ $requests = $admin->getDonationRequests();
 
 </body>
 </html>
+
