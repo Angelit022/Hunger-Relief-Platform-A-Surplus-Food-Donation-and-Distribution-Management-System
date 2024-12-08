@@ -196,7 +196,7 @@ $stmt->close();
             <table class="request-table table-bordered" id="requests-table">
                 <thead>
                     <tr>
-                        <th>Don ID</th>  
+                        <th>Don ID</th>   
                         <th>Req ID</th>
                         <th>Requestor Name</th>
                         <th>Email</th>
