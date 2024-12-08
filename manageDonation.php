@@ -109,7 +109,12 @@ $donations = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
                         <td><?= htmlspecialchars($donation['address']); ?></td>
                         <td><?= htmlspecialchars($donation['phone']); ?></td>
                         <td><?= htmlspecialchars($donation['products_type']); ?></td>
-                        <td><?= htmlspecialchars($donation['quantity']); ?></td>
+                        <td>
+                            <?php
+                            $quantity = htmlspecialchars($donation['quantity']);
+                            echo $quantity == 0 ? 'Out of Stock' : $quantity;
+                            ?>
+                        </td>
                         <td><?= htmlspecialchars($donation['products_condition']); ?></td>
                         <td><?= htmlspecialchars($donation['delivery_option']); ?></td>
                         <td><?= htmlspecialchars($donation['message']); ?></td>
