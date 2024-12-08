@@ -39,7 +39,6 @@ $stmt->bind_param('i', $_SESSION['user_id']);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Fetch the rows using a loop
 $donations = [];
 while ($row = $result->fetch_assoc()) {
     $donations[] = $row;
@@ -55,11 +54,12 @@ $query = "
         donation_requests.requestor_phone AS requestor_phone,  
         donations.id AS donation_id,  -- Donation ID
         donations.products_type,  -- Product type of the donor
-        donations.quantity AS donor_quantity,  -- Donor's quantity
-        donations.products_condition AS donor_condition,  -- Donor's condition (referred as condition here)
-        donations.delivery_option AS donor_delivery_option,  -- Donor's delivery option
+        donations.quantity,  -- Donor's quantity
+        donations.products_condition AS donor_condition,  
+        donations.delivery_option AS donor_delivery_option,  
         donation_requests.special_notes,
-        donation_requests.status
+        donation_requests.status,
+        donation_requests.quantity
     FROM donation_requests
     JOIN users ON donation_requests.user_id = users.user_id
     JOIN donations ON donation_requests.donation_id = donations.id  -- Joining donations table
@@ -71,7 +71,6 @@ $stmt->bind_param('i', $_SESSION['user_id']);
 $stmt->execute();
 $requestResult = $stmt->get_result();
 
-// Fetch the rows using a loop
 $requests = [];
 while ($row = $requestResult->fetch_assoc()) {
     $requests[] = $row;
@@ -81,7 +80,6 @@ while ($row = $requestResult->fetch_assoc()) {
 if (isset($_GET['cancel_id'])) {
     $cancelDonationId = intval($_GET['cancel_id']);
     
-    // Update the donation status to 'Cancelled'
     $updateQuery = "UPDATE donations SET status = 'Cancelled' WHERE id = ? AND user_id = ?";
     $updateStmt = $conn->prepare($updateQuery);
     $updateStmt->bind_param('ii', $cancelDonationId, $_SESSION['user_id']);
@@ -190,15 +188,13 @@ $stmt->close();
             </table>
         </div>
 
-
-
         <!-- Requests Table -->
         <div class="request-dashboard-container">
             <h2>Your Requests</h2>
             <table class="request-table table-bordered" id="requests-table">
                 <thead>
                     <tr>
-                        <th>Don ID</th>  
+                        <th>Don ID</th>   
                         <th>Req ID</th>
                         <th>Requestor Name</th>
                         <th>Email</th>
@@ -223,12 +219,11 @@ $stmt->close();
                         <td><?= htmlspecialchars($request['requestor_phone']) ?></td>
                         <td><?= htmlspecialchars($request['requestor_address']) ?></td>
                         <td><?= htmlspecialchars($request['products_type']) ?></td>
-                        <td><?= htmlspecialchars($request['donor_quantity']) ?></td>
+                        <td><?= htmlspecialchars($request['quantity']) ?></td>
                         <td><?= htmlspecialchars($request['donor_condition']) ?></td>
                         <td><?= htmlspecialchars($request['donor_delivery_option']) ?></td>
                         <td><?= htmlspecialchars($request['special_notes']) ?></td>
                         
-                        <!-- Status Badge -->
                         <td>
                             <?php 
                             switch ($request['status']) {
@@ -248,7 +243,6 @@ $stmt->close();
                             ?>
                         </td>
 
-                        <!-- Actions -->
                         <td>
                             <?php if ($request['status'] == 'Pending'): ?>
                                 <a href="edit_request.php?id=<?= $request['requestor_id'] ?>" class="btn btn-primary btn-sm">Edit</a>
