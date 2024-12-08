@@ -168,7 +168,11 @@ public function getUserDonations($user_id) {
             products_condition, 
             delivery_option, 
             created_at, 
-            status 
+            CASE 
+                WHEN quantity = 0 THEN 'Out of Stock'
+                WHEN status IS NULL OR status = '' THEN 'Pending'
+                ELSE status 
+            END AS status
         FROM donations 
         WHERE user_id = ?";
     $stmt = $connection->prepare($query);

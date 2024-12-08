@@ -1,5 +1,4 @@
 <?php 
-
 require_once __DIR__ . "/../classes/db_connection.php";
 
 class EmergencyRequest {
@@ -9,13 +8,15 @@ class EmergencyRequest {
         $this->db = new Database();
     }
 
-    public function saveRequestToDatabase($userId, $latitude, $longitude, $type, $details) {
+    public function saveRequestToDatabase($userId, $latitude, $longitude) {
         try {
             $connection = $this->db->getConnection();
-            $query = "INSERT INTO emergency_requests (user_id, type, details, latitude, longitude, status) VALUES (?, ?, ?, ?, ?, 'pending')";
+            $query = "INSERT INTO emergency_requests (user_id, latitude, longitude, status, name, email, phone) 
+                      SELECT ?, ?, ?, 'pending', CONCAT(first_name, ' ', last_name), email, phone 
+                      FROM users WHERE user_id = ?";
             $stmt = $connection->prepare($query);
-            $stmt->bind_param("issdd", $userId, $type, $details, $latitude, $longitude);
-            
+            $stmt->bind_param("iddi", $userId, $latitude, $longitude, $userId);
+        
             if ($stmt->execute()) {
                 return $connection->insert_id;
             } else {
@@ -33,14 +34,14 @@ class EmergencyRequest {
         $query = "
             SELECT 
                 er.id,
-                CONCAT(u.first_name, ' ', u.last_name) AS user_name,
-                u.email,
+                er.name AS user_name,
+                er.email,
+                er.phone,
                 er.latitude,
                 er.longitude,
                 er.created_at,
                 er.status
             FROM emergency_requests er
-            JOIN users u ON er.user_id = u.user_id
             ORDER BY er.created_at DESC
         ";
         
@@ -53,3 +54,4 @@ class EmergencyRequest {
     }
 }    
 ?>
+

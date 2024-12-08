@@ -6,7 +6,7 @@ class UserService extends Database {
     private $adminService;
 
     public function __construct() {
-        $this->adminService = new AdminService();
+        $this->adminService = new AdminService(); //instanciate
     }
 
     public function registerUser($first_name, $last_name, $email, $phone, $address, $password) {
@@ -20,7 +20,7 @@ class UserService extends Database {
         $stmt->execute();
         $user_id = $stmt->insert_id;
         $stmt->close();
-
+        
         return $user_id;
     }
 
