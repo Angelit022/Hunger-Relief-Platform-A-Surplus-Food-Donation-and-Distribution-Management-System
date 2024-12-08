@@ -39,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'], $_GET['reques
     }
 }
 
-// Fetch donation requests from the database
 $requests = $admin->getDonationRequests();
 
 // Fetch quantities from the RequestManager

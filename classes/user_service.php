@@ -6,7 +6,7 @@ class UserService extends Database {
     private $adminService;
 
     public function __construct() {
-        $this->adminService = new AdminService(); //instanciate
+        $this->adminService = new AdminService(); 
     }
 
     public function registerUser($first_name, $last_name, $email, $phone, $address, $password) {

@@ -188,8 +188,6 @@ $stmt->close();
             </table>
         </div>
 
-
-
         <!-- Requests Table -->
         <div class="request-dashboard-container">
             <h2>Your Requests</h2>
@@ -226,7 +224,6 @@ $stmt->close();
                         <td><?= htmlspecialchars($request['donor_delivery_option']) ?></td>
                         <td><?= htmlspecialchars($request['special_notes']) ?></td>
                         
-                        <!-- Status Badge -->
                         <td>
                             <?php 
                             switch ($request['status']) {
@@ -246,7 +243,6 @@ $stmt->close();
                             ?>
                         </td>
 
-                        <!-- Actions -->
                         <td>
                             <?php if ($request['status'] == 'Pending'): ?>
                                 <a href="edit_request.php?id=<?= $request['requestor_id'] ?>" class="btn btn-primary btn-sm">Edit</a>

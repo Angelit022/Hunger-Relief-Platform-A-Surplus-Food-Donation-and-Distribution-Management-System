@@ -23,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['action_result'] = $result ? 'success' : 'error';
     $_SESSION['action_message'] = $result ? 'The request has been ' . $action : 'There was an error processing the request.';
 
-    // Redirect to prevent form resubmission
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }

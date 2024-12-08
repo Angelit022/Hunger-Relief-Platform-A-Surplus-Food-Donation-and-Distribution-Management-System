@@ -31,6 +31,7 @@ class ActionHandler {
         return $stmt->execute();
     }
 
+    //stat
     public function updateStatus($id, $status, $table) {
         $idColumn = $this->getIdColumnForTable($table);
         $query = "UPDATE $table SET status = ? WHERE $idColumn = ?";
