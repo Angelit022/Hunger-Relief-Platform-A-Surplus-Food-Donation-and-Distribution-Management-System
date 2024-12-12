@@ -6,7 +6,6 @@ class Database {
     private $database = "hunger_relief_db";
     private $connection;
 
-    //connection for database
     public function getConnection() {
         if ($this->connection === null) {
             $this->connection = new mysqli($this->host, $this->username, $this->password, $this->database);

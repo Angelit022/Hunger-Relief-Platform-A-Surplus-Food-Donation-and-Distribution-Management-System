@@ -9,7 +9,7 @@ if (!isset($_SESSION['role']) ||
 
 require_once "../classAdmin/adminClass.php";
 
-// Get admin class instance
+// Get admin class  instance
 $adminDashboard = new AdminClass();
 
 $totalDonations = $adminDashboard->getTotalDonations();

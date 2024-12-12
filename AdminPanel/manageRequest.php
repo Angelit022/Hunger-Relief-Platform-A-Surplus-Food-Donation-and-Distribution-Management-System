@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'], $_GET['reques
 
 $requests = $admin->getDonationRequests();
 
-// Fetch quantities from the RequestManager
+// Fetch quantities
 $quantities = $requestManager->getRequestQuantities();
 $quantityMap = array();
 foreach ($quantities as $quantity) {

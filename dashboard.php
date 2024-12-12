@@ -76,7 +76,6 @@ while ($row = $requestResult->fetch_assoc()) {
     $requests[] = $row;
 }
 
-// Handle cancel action for donation
 if (isset($_GET['cancel_id'])) {
     $cancelDonationId = intval($_GET['cancel_id']);
     

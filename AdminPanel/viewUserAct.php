@@ -10,7 +10,7 @@ if (isset($_GET['user_id'])) {
     $donations = $admin->getUserDonations($user_id); 
     $requests = $admin->getUserRequests($user_id);   
 
-    // Calculate total donations and request
+    // Calculate total donations and requests
     $totalDonations = count($donations);
     $totalRequests = count($requests);
 } else {
