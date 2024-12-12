@@ -57,7 +57,12 @@ $query = "
         donations.quantity,  -- Donor's quantity
         donations.products_condition AS donor_condition,  
         donations.delivery_option AS donor_delivery_option,  
+        donations.quantity,  -- Donor's quantity
+        donations.products_condition AS donor_condition,  
+        donations.delivery_option AS donor_delivery_option,  
         donation_requests.special_notes,
+        donation_requests.status,
+        donation_requests.quantity
         donation_requests.status,
         donation_requests.quantity
     FROM donation_requests
@@ -219,6 +224,7 @@ $stmt->close();
                         <td><?= htmlspecialchars($request['requestor_phone']) ?></td>
                         <td><?= htmlspecialchars($request['requestor_address']) ?></td>
                         <td><?= htmlspecialchars($request['products_type']) ?></td>
+                        <td><?= htmlspecialchars($request['quantity']) ?></td>
                         <td><?= htmlspecialchars($request['quantity']) ?></td>
                         <td><?= htmlspecialchars($request['donor_condition']) ?></td>
                         <td><?= htmlspecialchars($request['donor_delivery_option']) ?></td>
