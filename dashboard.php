@@ -57,7 +57,12 @@ $query = "
         donations.quantity,  -- Donor's quantity
         donations.products_condition AS donor_condition,  
         donations.delivery_option AS donor_delivery_option,  
+        donations.quantity,  -- Donor's quantity
+        donations.products_condition AS donor_condition,  
+        donations.delivery_option AS donor_delivery_option,  
         donation_requests.special_notes,
+        donation_requests.status,
+        donation_requests.quantity
         donation_requests.status,
         donation_requests.quantity
     FROM donation_requests
@@ -188,15 +193,13 @@ $stmt->close();
             </table>
         </div>
 
-
-
         <!-- Requests Table -->
         <div class="request-dashboard-container">
             <h2>Your Requests</h2>
             <table class="request-table table-bordered" id="requests-table">
                 <thead>
                     <tr>
-                        <th>Don ID</th>  
+                        <th>Don ID</th>   
                         <th>Req ID</th>
                         <th>Requestor Name</th>
                         <th>Email</th>
@@ -222,11 +225,11 @@ $stmt->close();
                         <td><?= htmlspecialchars($request['requestor_address']) ?></td>
                         <td><?= htmlspecialchars($request['products_type']) ?></td>
                         <td><?= htmlspecialchars($request['quantity']) ?></td>
+                        <td><?= htmlspecialchars($request['quantity']) ?></td>
                         <td><?= htmlspecialchars($request['donor_condition']) ?></td>
                         <td><?= htmlspecialchars($request['donor_delivery_option']) ?></td>
                         <td><?= htmlspecialchars($request['special_notes']) ?></td>
                         
-                        <!-- Status Badge -->
                         <td>
                             <?php 
                             switch ($request['status']) {
@@ -246,7 +249,6 @@ $stmt->close();
                             ?>
                         </td>
 
-                        <!-- Actions -->
                         <td>
                             <?php if ($request['status'] == 'Pending'): ?>
                                 <a href="edit_request.php?id=<?= $request['requestor_id'] ?>" class="btn btn-primary btn-sm">Edit</a>

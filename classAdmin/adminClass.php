@@ -168,7 +168,11 @@ public function getUserDonations($user_id) {
             products_condition, 
             delivery_option, 
             created_at, 
-            status 
+            CASE 
+                WHEN quantity = 0 THEN 'Out of Stock'
+                WHEN status IS NULL OR status = '' THEN 'Pending'
+                ELSE status 
+            END AS status
         FROM donations 
         WHERE user_id = ?";
     $stmt = $connection->prepare($query);
@@ -200,7 +204,7 @@ public function getUserRequests($user_id) {
 }
 
 
-//for editing and deleting user
+
 
 public function getUserById($user_id) {
     $connection = $this->getConnection();
@@ -216,6 +220,7 @@ public function getUserById($user_id) {
     return $result ? $result->fetch_assoc() : null;
 }
 
+//edting request
 public function updateUser($user_id, $first_name, $last_name, $email, $phone, $address) {
     $connection = $this->getConnection();
     $query = "
@@ -229,6 +234,7 @@ public function updateUser($user_id, $first_name, $last_name, $email, $phone, $a
     return $stmt->affected_rows > 0;
 }
 
+//deletingr equest
 public function deleteUser($user_id) {
     $connection = $this->getConnection();
 

@@ -10,7 +10,7 @@ if (isset($_GET['user_id'])) {
     $donations = $admin->getUserDonations($user_id); 
     $requests = $admin->getUserRequests($user_id);   
 
-    // Calculate total donations and requests
+    // Calculate total donations and request
     $totalDonations = count($donations);
     $totalRequests = count($requests);
 } else {
@@ -60,7 +60,7 @@ if (isset($_GET['user_id'])) {
                                 <td><?php echo htmlspecialchars($donation['products_type']); ?></td>
                                 <td><?php echo htmlspecialchars($donation['quantity']); ?></td>
                                 <td><?php echo htmlspecialchars($donation['created_at'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($donation['status'] ?? 'Pending'); ?></td>
+                                <td><?php echo htmlspecialchars($donation['status']); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
