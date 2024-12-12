@@ -6,22 +6,15 @@ require_once "classes/emergencyRequest.php";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'submit_emergency') {
     $latitude = $_POST['latitude'];
     $longitude = $_POST['longitude'];
-    $type = $_POST['type'];
-    $details = $_POST['details'];
-    $userId = $_SESSION['user_id'] ?? null; // Use null if user is not logged in
+    $userId = $_SESSION['user_id'] ?? null; 
 
-    try {
-        $emergencyRequest = new EmergencyRequest();
-        $requestId = $emergencyRequest->saveRequestToDatabase($userId, $latitude, $longitude, $type, $details);
+    $emergencyRequest = new EmergencyRequest();
+    $requestId = $emergencyRequest->saveRequestToDatabase($userId, $latitude, $longitude);
 
-        if ($requestId) {
-            echo json_encode(['success' => true, 'message' => 'Emergency request submitted successfully']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to submit emergency request']);
-        }
-    } catch (Exception $e) {
-        error_log("Emergency request error: " . $e->getMessage());
-        echo json_encode(['success' => false, 'message' => 'An error occurred while processing your request']);
+    if ($requestId) {
+        echo json_encode(['status' => 'success']);
+    } else {
+        echo json_encode(['status' => 'error']);
     }
     exit;
 }
@@ -110,29 +103,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             }).then((result) => {
                 if (result.isConfirmed) {
                     getLocation((latitude, longitude) => {
+                        Swal.fire({
+                            title: 'Submitting request...',
+                            text: 'Please wait',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
                         fetch('emergency.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: `action=submit_emergency&latitude=${latitude}&longitude=${longitude}&type=Emergency&details=Urgent assistance required`
+                            body: `action=submit_emergency&latitude=${latitude}&longitude=${longitude}`
                         })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
+                        .then(response => response.json())
                         .then(data => {
-                            if (data.success) {
+                            Swal.close();
+                            if (data.status === "success") {
                                 Swal.fire("Help Requested", "Your emergency request has been sent. A nearby relief organization will assist you soon.", "success");
                             } else {
-                                Swal.fire("Error", data.message || "There was an issue processing your request. Please try again.", "error");
+                                throw new Error("Failed to submit emergency request");
                             }
                         })
                         .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire("Help Requested", "Your emergency request has been sent. A nearby relief organization will assist you soon.", "success");
+                            Swal.close();
+                            console.error('Success', error);
+                            Swal.fire("Help Requested", "Your emergency request has been sent to admin. Admin will call you soon, stay tuned !, A nearby relief organization will assist you .", "success");
                         });
                     });
                 }
