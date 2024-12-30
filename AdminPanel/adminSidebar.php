@@ -32,7 +32,7 @@ if (isset($_SESSION['role'])):
         <button onclick="location.href='manageUser.php'">Users Manager</button>
         <button onclick="location.href='manageEmergency.php'">Emergency Manager</button>
     <?php endif ?>
-    <!-- Logout button -->
+
     <button class="logout" onclick="location.href='../logout.php'">LOGOUT</button>
 </div>
 <?php endif; ?>

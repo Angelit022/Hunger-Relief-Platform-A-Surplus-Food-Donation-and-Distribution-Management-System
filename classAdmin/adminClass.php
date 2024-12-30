@@ -64,7 +64,6 @@ public function updateRequestStatus($status, $request_id) {
 
         $connection = $this->getConnection();
         
-        // Updated SQL query to fetch detailed information about requests
         $sql = "
             SELECT 
                 dr.donation_id,
@@ -88,7 +87,6 @@ public function updateRequestStatus($status, $request_id) {
         $result = $connection->query($sql);
     
         if ($result) {
-            // Fetch all results as an associative array
             return $result->fetch_all(MYSQLI_ASSOC); 
         } else {
             return []; 
@@ -220,7 +218,7 @@ public function getUserById($user_id) {
     return $result ? $result->fetch_assoc() : null;
 }
 
-//edting request
+
 public function updateUser($user_id, $first_name, $last_name, $email, $phone, $address) {
     $connection = $this->getConnection();
     $query = "
@@ -234,23 +232,58 @@ public function updateUser($user_id, $first_name, $last_name, $email, $phone, $a
     return $stmt->affected_rows > 0;
 }
 
-//deletingr equest
+
 public function deleteUser($user_id) {
     $connection = $this->getConnection();
 
-    $query = "DELETE FROM users WHERE user_id = ?";
-    $stmt = $connection->prepare($query);
+    // Start a transaction
+    $connection->begin_transaction();
 
-    if (!$stmt) {
-        return false;  
-    }
+    try {
+        // First, check if the user has any associated donations
+        $checkQuery = "SELECT COUNT(*) as count FROM donations WHERE user_id = ?";
+        $checkStmt = $connection->prepare($checkQuery);
+        $checkStmt->bind_param("i", $user_id);
+        $checkStmt->execute();
+        $result = $checkStmt->get_result();
+        $row = $result->fetch_assoc();
+        
+        if ($row['count'] > 0) {
+            // User has donations, we can't delete
+            throw new Exception("User has associated donations and cannot be deleted.");
+        }
 
-    $stmt->bind_param("i", $user_id);
+        // Check if the user has any associated requests
+        $checkRequestsQuery = "SELECT COUNT(*) as count FROM donation_requests WHERE user_id = ?";
+        $checkRequestsStmt = $connection->prepare($checkRequestsQuery);
+        $checkRequestsStmt->bind_param("i", $user_id);
+        $checkRequestsStmt->execute();
+        $requestsResult = $checkRequestsStmt->get_result();
+        $requestsRow = $requestsResult->fetch_assoc();
+        
+        if ($requestsRow['count'] > 0) {
+            // User has requests, we can't delete
+            throw new Exception("User has associated donation requests and cannot be deleted.");
+        }
 
-    if ($stmt->execute()) {
-        return $stmt->affected_rows > 0;
-    } else {
-        return false;  
+        // If we've made it here, the user has no donations or requests, so we can delete
+        $deleteQuery = "DELETE FROM users WHERE user_id = ?";
+        $deleteStmt = $connection->prepare($deleteQuery);
+        $deleteStmt->bind_param("i", $user_id);
+        $deleteStmt->execute();
+
+        if ($deleteStmt->affected_rows == 0) {
+            throw new Exception("No user found with the given ID.");
+        }
+
+        // If successful, commit the transaction
+        $connection->commit();
+        return true;
+    } catch (Exception $e) {
+        // If an error occurs, roll back the transaction
+        $connection->rollback();
+        // Re-throw the exception with the error message
+        throw new Exception($e->getMessage());
     }
 }
 

@@ -18,8 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'rejected') {
         $result = $actionHandler->rejectRecord($id, $table);
     }
-
-    // Set a session variable to indicate the action result
+    
+    //didisplay sa taas
     $_SESSION['action_result'] = $result ? 'success' : 'error';
     $_SESSION['action_message'] = $result ? 'The request has been ' . $action : 'There was an error processing the request.';
 

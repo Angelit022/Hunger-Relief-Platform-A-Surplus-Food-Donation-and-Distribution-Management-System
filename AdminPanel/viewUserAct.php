@@ -2,7 +2,7 @@
 require_once 'adminSidebar.php';
 require_once '../classAdmin/adminClass.php';
 
-$admin = new AdminClass();
+$admin = new AdminClass(); //create instance
 
 if (isset($_GET['user_id'])) {
     $user_id = $_GET['user_id'];

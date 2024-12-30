@@ -99,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<script>
                     Swal.fire({
                         title: 'Error!',
-                        text: 'There was an issue submitting your request. Please try again later.',
+                        text: 'There was an issue submitting your request or you are already requested.',
                         icon: 'error',
                         confirmButtonText: 'Close'
                     });
@@ -194,7 +194,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
 
             <div class="form-buttons">
-                <a href="search.php" class="btn-cancel">Cancel</a>
+                <a href="donation_list.php" class="btn-cancel">Cancel</a>
                 <button type="submit" class="btn-submit" <?= $donation['quantity'] == 0 ? 'disabled' : '' ?>>
                     <?= $donation['quantity'] == 0 ? 'Out of Stock' : 'Submit Request' ?>
                 </button>

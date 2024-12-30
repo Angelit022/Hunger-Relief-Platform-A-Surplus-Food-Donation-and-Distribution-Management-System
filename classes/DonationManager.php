@@ -132,7 +132,7 @@ class DonationManager {
     public function getLatestDonationByProductType($productType) {
         $sql = "SELECT d.*, CONCAT(u.first_name, ' ', u.last_name) AS donor_name, u.address AS donor_address 
                 FROM donations d 
-                JOIN users u ON d.user_id = u.user_id 
+                INNER JOIN users u ON d.user_id = u.user_id 
                 WHERE d.products_type = ? 
                 ORDER BY d.created_at DESC 
                 LIMIT 1";
@@ -197,7 +197,7 @@ class DonationManager {
         if (!$this->conn) {
             return false;
         }
-
+        
         $sql = "SELECT COUNT(*) as count FROM donations WHERE id = ? AND user_id = ?";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {

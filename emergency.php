@@ -1,18 +1,21 @@
 <?php
 require_once "layout/header.php";
-require_once "classes/db_connection.php";
-require_once "classes/emergencyRequest.php";    
+require_once "classes/db_connection.php"; 
+require_once "classes/emergencyRequest.php"; 
 
+// Check if the request is a POST request and the action is to submit an emergency request
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'submit_emergency') {
+    // Retrieve latitude, longitude, and user ID from POST data and session
     $latitude = $_POST['latitude'];
     $longitude = $_POST['longitude'];
-    $userId = $_SESSION['user_id'] ?? null; 
+    $userId = $_SESSION['user_id'] ?? null; // Defaults to null if the user is not logged in
 
     $emergencyRequest = new EmergencyRequest();
     $requestId = $emergencyRequest->saveRequestToDatabase($userId, $latitude, $longitude);
 
+    // Return JSON response based on the success of the database operation
     if ($requestId) {
-        echo json_encode(['status' => 'success']);
+        echo json_encode(['status' => 'success']); 
     } else {
         echo json_encode(['status' => 'error']);
     }
@@ -103,21 +106,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             }).then((result) => {
                 if (result.isConfirmed) {
                     getLocation((latitude, longitude) => {
-                        Swal.fire({
-                            title: 'Submitting request...',
-                            text: 'Please wait',
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                            willOpen: () => {
-                                Swal.showLoading();
-                            }
-                        });
+
                         fetch('emergency.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: `action=submit_emergency&latitude=${latitude}&longitude=${longitude}`
+                            body: `action=submit_emergency&latitude=${latitude}&longitude=${longitude}` //dito
                         })
                         .then(response => response.json())
                         .then(data => {
