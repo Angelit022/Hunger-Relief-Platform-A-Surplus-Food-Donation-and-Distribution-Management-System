@@ -15,17 +15,22 @@ class AdminService {
         ]
     ];
 
-    public function getAdminRole($email, $password) {
-        foreach ($this->adminCredentials as $role => $credentials) {
-            if ($email === $credentials['email'] && $password === $credentials['password']) {
-                return $role;
-            }
+  // Method to identify the role of an admin based on their email and password
+  public function getAdminRole($email, $password) {
+    // Loop through all admin credentials to find a match
+    foreach ($this->adminCredentials as $role => $credentials) {
+        // Check if the provided email and password match the stored credentials
+        if ($email === $credentials['email'] && $password === $credentials['password']) {
+            return $role; // Return the role if a match is found
         }
-        return null;
     }
+    // Return null if no match is found
+    return null;
+}
 
-    public function getAdminCredentials() {
-        return $this->adminCredentials;
-    }
+// Method to retrieve all stored admin credentials
+public function getAdminCredentials() {
+    return $this->adminCredentials; // Return the array of admin credentials
+}
 }
 ?>

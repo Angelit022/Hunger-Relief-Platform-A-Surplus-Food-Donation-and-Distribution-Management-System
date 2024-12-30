@@ -99,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<script>
                     Swal.fire({
                         title: 'Error!',
-                        text: 'There was an issue submitting your request. Please try again later.',
+                        text: 'There was an issue submitting your request or you are already requested.',
                         icon: 'error',
                         confirmButtonText: 'Close'
                     });

@@ -52,9 +52,9 @@ $query = "
         users.email AS requestor_email,
         users.address AS requestor_address,
         donation_requests.requestor_phone AS requestor_phone,  
-        donations.id AS donation_id,  -- Donation ID
-        donations.products_type,  -- Product type of the donor
-        donations.quantity,  -- Donor's quantity
+        donations.id AS donation_id, 
+        donations.products_type, 
+        donations.quantity, 
         donations.products_condition AS donor_condition,  
         donations.delivery_option AS donor_delivery_option,  
         donation_requests.special_notes,
@@ -62,7 +62,7 @@ $query = "
         donation_requests.quantity
     FROM donation_requests
     JOIN users ON donation_requests.user_id = users.user_id
-    JOIN donations ON donation_requests.donation_id = donations.id  -- Joining donations table
+    JOIN donations ON donation_requests.donation_id = donations.id  
     WHERE donation_requests.user_id = ?
 ";
 
@@ -76,22 +76,22 @@ while ($row = $requestResult->fetch_assoc()) {
     $requests[] = $row;
 }
 
-if (isset($_GET['cancel_id'])) {
-    $cancelDonationId = intval($_GET['cancel_id']);
+// if (isset($_GET['cancel_id'])) {
+//     $cancelDonationId = intval($_GET['cancel_id']);
     
-    $updateQuery = "UPDATE donations SET status = 'Cancelled' WHERE id = ? AND user_id = ?";
-    $updateStmt = $conn->prepare($updateQuery);
-    $updateStmt->bind_param('ii', $cancelDonationId, $_SESSION['user_id']);
+//     $updateQuery = "UPDATE donations SET status = 'Cancelled' WHERE id = ? AND user_id = ?";
+//     $updateStmt = $conn->prepare($updateQuery);
+//     $updateStmt->bind_param('ii', $cancelDonationId, $_SESSION['user_id']);
     
-    if ($updateStmt->execute()) {
-        header("Location: dashboard.php");
-        exit();
-    } else {
-        echo "Error cancelling donation.";
-    }
+//     if ($updateStmt->execute()) {
+//         header("Location: dashboard.php");
+//         exit();
+//     } else {
+//         echo "Error cancelling donation.";
+//     }
     
-    $updateStmt->close();
-}
+//     $updateStmt->close();
+// }
 
 
 $stmt->close();

@@ -13,6 +13,7 @@ $first_name = $last_name = $email = $phone = $address = $password = $confirm_pas
 $first_name_error = $last_name_error = $email_error = $phone_error = $address_error = $password_error = $confirm_password_error = "";
 $error = false;
 
+//form insertion / send data to server using POST
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $first_name = $_POST['first_name'];
     $last_name = $_POST['last_name'];

@@ -5,7 +5,7 @@ class EmergencyRequest {
     private $db;
 
     public function __construct() {
-        $this->db = new Database();
+        $this->db = new Database();         //initialize
     }
 
     public function saveRequestToDatabase($userId, $latitude, $longitude) {

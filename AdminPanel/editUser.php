@@ -3,7 +3,7 @@ require_once 'adminSidebar.php';
 require_once '../classAdmin/adminClass.php';
 
 $admin = new AdminClass();
-$error_message = '';
+$error_message = '';      //instanciating
 $success_message = '';
 
 $first_name_error = '';
@@ -17,10 +17,6 @@ if (isset($_GET['user_id'])) {
     $user_id = $_GET['user_id'];
     $user = $admin->getUserById($user_id);
 
-    if (!$user) {
-        $error_message = "User not found!";
-    }
-
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Sanitize and validate input
         $first_name = htmlspecialchars(trim($_POST['first_name']));
@@ -31,19 +27,16 @@ if (isset($_GET['user_id'])) {
 
         $valid = true;
 
-        // Validate First Name
+        // Validatation
         if (empty($first_name)) {
             $first_name_error = 'First name is required.';
             $valid = false;
         }
 
-        // Validate Last Name
         if (empty($last_name)) {
             $last_name_error = 'Last name is required.';
             $valid = false;
         }
-
-        // Validate Email
         if (empty($email)) {
             $email_error = 'Email is required.';
             $valid = false;
@@ -51,8 +44,6 @@ if (isset($_GET['user_id'])) {
             $email_error = 'Please enter a valid email.';
             $valid = false;
         }
-
-        // Validate Phone
         if (empty($phone)) {
             $phone_error = 'Phone number is required.';
             $valid = false;
@@ -60,8 +51,6 @@ if (isset($_GET['user_id'])) {
             $phone_error = 'Please enter a valid phone number (11 digits).';
             $valid = false;
         }
-
-        // Validate Address
         if (empty($address)) {
             $address_error = 'Address is required.';
             $valid = false;
@@ -91,11 +80,7 @@ if (isset($_GET['user_id'])) {
     <title>Edit User</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="adminStyles.css">
-    
-    <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
-
-    <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.js"></script>
 </head>
 <body>
@@ -103,7 +88,7 @@ if (isset($_GET['user_id'])) {
 <div class="containers mt-4">
     <h2>Edit User Information</h2>
 
-    <!-- Display error or success messages using SweetAlert -->
+
     <?php if ($error_message): ?>
         <script>
             Swal.fire({
